@@ -1,0 +1,193 @@
+{
+    "info": {
+      "name": "Sponge-Theory.ai API",
+      "description": "API collection for Sponge-Theory.ai platform",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      {
+        "key": "base_url",
+        "value": "http://localhost:8000",
+        "type": "string"
+      }
+    ],
+    "auth": {
+      "type": "bearer",
+      "bearer": [
+        {
+          "key": "token",
+          "value": "{{auth_token}}",
+          "type": "string"
+        }
+      ]
+    },
+    "item": [
+      {
+        "name": "Health",
+        "item": [
+          {
+            "name": "Health Check",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "{{base_url}}/health",
+                "host": ["{{base_url}}"],
+                "path": ["health"]
+              }
+            }
+          },
+          {
+            "name": "Liveness Probe",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "{{base_url}}/health/live",
+                "host": ["{{base_url}}"],
+                "path": ["health", "live"]
+              }
+            }
+          },
+          {
+            "name": "Readiness Probe",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "{{base_url}}/health/ready",
+                "host": ["{{base_url}}"],
+                "path": ["health", "ready"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Users",
+        "item": [
+          {
+            "name": "Create User",
+            "request": {
+              "method": "POST",
+              "url": {
+                "raw": "{{base_url}}/api/v1/users",
+                "host": ["{{base_url}}"],
+                "path": ["api", "v1", "users"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"email\": \"user@example.com\",\n    \"name\": \"Test User\",\n    \"clerk_id\": \"clerk_123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "Get Current User",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "{{base_url}}/api/v1/users/me",
+                "host": ["{{base_url}}"],
+                "path": ["api", "v1", "users", "me"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Products",
+        "item": [
+          {
+            "name": "Create Product",
+            "request": {
+              "method": "POST",
+              "url": {
+                "raw": "{{base_url}}/api/v1/products",
+                "host": ["{{base_url}}"],
+                "path": ["api", "v1", "products"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"name\": \"Test Product\",\n    \"description\": \"A test product\",\n    \"price\": 99.99,\n    \"stripe_price_id\": \"price_123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "name": "Get All Products",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "{{base_url}}/api/v1/products?skip=0&limit=100",
+                "host": ["{{base_url}}"],
+                "path": ["api", "v1", "products"],
+                "query": [
+                  {
+                    "key": "skip",
+                    "value": "0"
+                  },
+                  {
+                    "key": "limit",
+                    "value": "100"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "name": "Get Product by ID",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "{{base_url}}/api/v1/products/1",
+                "host": ["{{base_url}}"],
+                "path": ["api", "v1", "products", "1"]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Payments",
+        "item": [
+          {
+            "name": "Create Checkout Session",
+            "request": {
+              "method": "POST",
+              "url": {
+                "raw": "{{base_url}}/api/v1/payments/create-checkout-session/1",
+                "host": ["{{base_url}}"],
+                "path": ["api", "v1", "payments", "create-checkout-session", "1"]
+              }
+            }
+          },
+          {
+            "name": "Create Payment",
+            "request": {
+              "method": "POST",
+              "url": {
+                "raw": "{{base_url}}/api/v1/payments",
+                "host": ["{{base_url}}"],
+                "path": ["api", "v1", "payments"]
+              },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n    \"amount\": 99.99,\n    \"user_id\": 1,\n    \"product_id\": 1,\n    \"stripe_payment_id\": \"pi_123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }

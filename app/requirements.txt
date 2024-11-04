@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+sqlalchemy-utils
+pydantic
+pydantic-settings
+pydantic[email]
+psycopg2-binary
+alembic
+stripe
+python-jose[cryptography]
+psutil
+python-json-logger
+PyJWT
+python-json-logger
+httpx
