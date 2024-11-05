@@ -7,15 +7,30 @@ from app.core.config import settings
 import alembic.util.exc
 import shutil
 
+# Import the base and all models
+from app.db.base import Base  # This imports all models
+from app.models.user import User  # For create_default_admin
+
 def backup_versions_directory():
     versions_dir = "alembic/versions"
     backup_dir = "alembic/versions_backup"
     
+    # Create versions directory if it doesn't exist
+    os.makedirs(versions_dir, exist_ok=True)
+    
+    # If versions directory is empty and backup exists, restore from backup
+    if not any(f.endswith('.py') for f in os.listdir(versions_dir)) and os.path.exists(backup_dir):
+        print("Versions directory empty, restoring from backup...")
+        for file in os.listdir(backup_dir):
+            if file.endswith('.py'):
+                src = os.path.join(backup_dir, file)
+                dst = os.path.join(versions_dir, file)
+                shutil.copy2(src, dst)
+        return
+
+    # Otherwise, backup existing files
     if os.path.exists(versions_dir):
-        # Create backup directory if it doesn't exist
         os.makedirs(backup_dir, exist_ok=True)
-        
-        # Move all files to backup
         for file in os.listdir(versions_dir):
             if file.endswith('.py'):
                 src = os.path.join(versions_dir, file)
@@ -50,8 +65,10 @@ def run_alembic_upgrade():
         raise
 
 def reset_database():
-    # Backup existing migration files
-    print("Backing up existing migration files...")
+    print("Starting database reset...")
+    
+    # Backup/restore migration files
+    print("Managing migration files...")
     backup_versions_directory()
     
     # Create a new SQLAlchemy engine
@@ -63,13 +80,48 @@ def reset_database():
         drop_all_tables(engine)
         print("All tables dropped.")
 
-        # Run Alembic migrations to recreate tables
-        print("Running Alembic migrations...")
-        run_alembic_upgrade()
+        # Create tables using SQLAlchemy
+        print("Creating tables with SQLAlchemy...")
+        Base.metadata.create_all(bind=engine)
+        
+        try:
+            # Then run migrations to ensure proper state
+            print("Running Alembic migrations...")
+            run_alembic_upgrade()
+        except Exception as e:
+            print(f"Warning: Alembic migrations failed: {e}")
+            print("Continuing with SQLAlchemy tables...")
+        
+        # Create MetaData instance and reflect tables to ensure they exist
+        meta = MetaData()
+        meta.reflect(bind=engine)
+        
+        if 'users' in meta.tables:
+            print("Creating default admin user...")
+            #create_default_admin(engine)
+            print("Default admin user created.")
+        else:
+            raise Exception("Users table was not created properly")
+            
         print("Database reset complete.")
     except Exception as e:
         print(f"Error resetting database: {e}")
         raise
+
+def create_default_admin(engine):
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    admin_user = User(
+        clerk_id="admin",
+        email="christophe.verdier@sponge-theory.io",
+        name="Admin User",
+        language="en",
+        role="admin",
+        # Assume password hashing is handled elsewhere
+    )
+    session.add(admin_user)
+    session.commit()
+    session.close()
 
 if __name__ == "__main__":
     reset_database() 

@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
-import type { Product } from '../types';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { productApi } from '../services/api';
+import type { Product } from '../types/product';
 
 interface ProductContextType {
   products: Product[];
@@ -7,49 +8,35 @@ interface ProductContextType {
   error: string | null;
 }
 
-const defaultProducts: Product[] = [
-  {
-    id: 'neural-text-analyzer',
-    name: 'Neural Text Analyzer',
-    description: 'Advanced NLP for text analysis and understanding',
-    imageUrl: 'https://images.unsplash.com/photo-1655720828018-edd2daec9349',
-    category: 'Language Processing'
-  },
-  {
-    id: 'quantum-image-processor',
-    name: 'Quantum Image Processor',
-    description: 'Next-gen image analysis and enhancement',
-    imageUrl: 'https://images.unsplash.com/photo-1675271591211-126ad94e495d',
-    category: 'Computer Vision'
-  },
-  {
-    id: 'deep-learning-studio',
-    name: 'Deep Learning Studio',
-    description: 'Visual deep learning model creation',
-    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995',
-    category: 'Machine Learning'
-  },
-  {
-    id: 'ai-code-assistant',
-    name: 'AI Code Assistant',
-    description: 'Intelligent code completion and analysis',
-    imageUrl: 'https://images.unsplash.com/photo-1671726203638-83742a2721a1',
-    category: 'Development Tools'
-  }
-];
-
 const ProductContext = createContext<ProductContextType>({
-  products: defaultProducts,
+  products: [] as Product[],
   loading: false,
   error: null,
 });
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [loading] = useState(false);
-  const [error] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await productApi.getAll();
+        setProducts(Array.isArray(response.data) ? response.data : []);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Error loading products');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
-    <ProductContext.Provider value={{ products: defaultProducts, loading, error }}>
+    <ProductContext.Provider value={{ products, loading, error }}>
       {children}
     </ProductContext.Provider>
   );

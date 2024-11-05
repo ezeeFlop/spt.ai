@@ -11,9 +11,15 @@ class ProductBase(BaseModel):
 class ProductCreate(ProductBase):
     pass
 
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    cover_image: Optional[str] = None
+    demo_video_link: Optional[str] = None
+    frontend_url: Optional[str] = None
+
 class Product(ProductBase):
     id: int
-    tiers: List['Tier'] = []
 
     class Config:
         from_attributes = True

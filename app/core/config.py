@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+import os
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Sponge-Theory.ai API"
@@ -12,6 +13,11 @@ class Settings(BaseSettings):
     CLERK_SECRET_KEY: str
     STRIPE_SECRET_KEY: str
     DATABASE_URL: str
+    
+    # Update Clerk JWT settings
+    CLERK_JWKS_URL: str
+    CLERK_JWT_AUDIENCE: str = os.getenv("CLERK_JWT_AUDIENCE", "")
+    CLERK_JWT_ISSUER: str = os.getenv("CLERK_JWT_ISSUER", "")
     
     class Config:
         env_file = ".env"

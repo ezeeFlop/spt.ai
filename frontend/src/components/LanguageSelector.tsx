@@ -17,9 +17,6 @@ const LanguageSelector: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const handleLanguageChange = async (code: Locale) => {
-    setLocale(code);
-    setIsOpen(false);
-
     if (isSignedIn && userId) {
       try {
         await authApi.syncUser(userId, code);
@@ -27,6 +24,8 @@ const LanguageSelector: React.FC = () => {
         console.error('Error syncing language preference:', error);
       }
     }
+    setLocale(code);
+    setIsOpen(false);
   };
 
   return (

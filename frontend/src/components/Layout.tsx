@@ -1,26 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { SignInButton, SignUpButton, UserButton, useAuth } from '@clerk/clerk-react';
 import { Menu, Brain } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { authApi } from '../services/api';
 import { useIntl } from 'react-intl';
+import { useUserRole } from '../hooks/useUserRole';
 import LanguageSelector from './LanguageSelector';
+import { Product } from '../types/index';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isSignedIn, userId } = useAuth();
-  const { products } = useProducts();
+  const { role } = useUserRole();
+  const { products, loading } = useProducts();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const intl = useIntl();
 
-  const productsByCategory = products.reduce((acc, product) => {
-    const category = product.category || intl.formatMessage({ id: 'products.category.other' });
-    if (!acc[category]) {
-      acc[category] = [];
+  const getProductCategory = (product: Product) => {
+    if (product.category) {
+      return product.category;
     }
-    acc[category].push(product);
-    return acc;
-  }, {} as Record<string, typeof products>);
+    
+    if (product.name.toLowerCase().includes('analysis')) {
+      return intl.formatMessage({ id: 'products.category.analysis' });
+    } else if (product.name.toLowerCase().includes('process')) {
+      return intl.formatMessage({ id: 'products.category.processing' });
+    }
+    
+    return intl.formatMessage({ id: 'products.category.other' });
+  };
+
+  const productsByCategory = useMemo(() => {
+    if (!Array.isArray(products)) {
+      return {};
+    }
+    
+    return products.reduce((acc, product) => {
+      const category = getProductCategory(product);
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(product);
+      return acc;
+    }, {} as Record<string, typeof products>);
+  }, [products, intl]);
 
   useEffect(() => {
     const syncUserWithBackend = async () => {
@@ -59,6 +82,11 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <Link to="/blog" className="text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium">
                   {intl.formatMessage({ id: 'app.nav.blog' })}
                 </Link>
+                {isSignedIn && role === 'admin' && (
+                  <Link to="/dashboard" className="text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium">
+                    {intl.formatMessage({ id: 'app.nav.dashboard' })}
+                  </Link>
+                )}
                 
                 <div className="relative group">
                   <button className="text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium inline-flex items-center">
@@ -70,22 +98,29 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   
                   <div className="absolute left-0 mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <div className="py-1">
-                      {Object.entries(productsByCategory).map(([category, categoryProducts]) => (
-                        <div key={category}>
-                          <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                            {category}
-                          </div>
-                          {categoryProducts.map((product) => (
-                            <Link
-                              key={product.id}
-                              to={`/products/${product.id}`}
-                              className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700"
-                            >
-                              {intl.formatMessage({ id: `products.${product.id}.name` })}
-                            </Link>
-                          ))}
+                      {loading ? (
+                        <div className="py-2 px-4">
+                          <div className="animate-pulse h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                          <div className="animate-pulse h-4 bg-gray-200 rounded w-32"></div>
                         </div>
-                      ))}
+                      ) : (
+                        Object.entries(productsByCategory).map(([category, categoryProducts]) => (
+                          <div key={category}>
+                            <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                              {category}
+                            </div>
+                            {categoryProducts.map((product) => (
+                              <Link
+                                key={product.id}
+                                to={`/products/${product.id}`}
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700"
+                              >
+                                {product.name}
+                              </Link>
+                            ))}
+                          </div>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>
@@ -151,6 +186,14 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               >
                 {intl.formatMessage({ id: 'app.nav.blog' })}
               </Link>
+              {isSignedIn && role === 'admin' && (
+                <Link
+                  to="/dashboard"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50"
+                >
+                  {intl.formatMessage({ id: 'app.nav.dashboard' })}
+                </Link>
+              )}
               {Object.entries(productsByCategory).map(([category, categoryProducts]) => (
                 <div key={category}>
                   <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -162,7 +205,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       to={`/products/${product.id}`}
                       className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50"
                     >
-                      {intl.formatMessage({ id: `products.${product.id}.name` })}
+                      {product.name}
                     </Link>
                   ))}
                 </div>

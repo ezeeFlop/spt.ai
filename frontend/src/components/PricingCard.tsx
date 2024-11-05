@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { useUser } from '@clerk/clerk-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { paymentApi } from '../services/api';
+import { toast } from 'react-toastify';
 
 interface PricingFeature {
   textId: string;
@@ -27,23 +28,31 @@ const PricingCard: React.FC<PricingTierProps> = ({ tierId, name, price, features
   const intl = useIntl();
 
   const handleSubscribe = async () => {
-    if (tierId === 'free') {
-      // Handle free tier signup
-      window.location.href = '/sign-up';
-      return;
-    }
-
     if (!isSignedIn) {
-      window.location.href = '/sign-in';
+      window.location.href = tierId === 'free' ? '/sign-up' : '/sign-in';
       return;
     }
 
     try {
+      if (tierId === 'free') {
+        const subscription = await paymentApi.registerFreeTier();
+        window.location.href = '/dashboard';
+        return;
+      }
+
       const stripe = await stripePromise;
-      const response = await paymentApi.createCheckoutSession(stripePriceId);
-      await stripe?.redirectToCheckout({ sessionId: response.data.id });
+      if (!stripe) throw new Error('Stripe failed to load');
+
+      const { checkout_session_id, url } = await paymentApi.createCheckoutSession(
+        parseInt(tierId)
+      );
+
+      // Redirect to Stripe checkout
+      window.location.href = url;
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error('Payment error:', error);
+      // Show error toast or notification
+      toast.error('Failed to process payment. Please try again.');
     }
   };
 

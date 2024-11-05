@@ -1,41 +1,42 @@
+from pydantic import BaseModel
+from typing import Optional, List
 from datetime import datetime
-from pydantic import BaseModel, Field
-from typing import List, Optional
+
+class BlogAuthor(BaseModel):
+    id: int
+    name: str
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 class BlogPostBase(BaseModel):
     title: str
-    description: str
     content: str
-    slug: str
+    description: str
     image_url: Optional[str] = None
-    tags: List[str] = Field(default_factory=list)
+    tags: List[str] = []
+    published: bool = False
 
 class BlogPostCreate(BlogPostBase):
     pass
 
 class BlogPostUpdate(BaseModel):
     title: Optional[str] = None
-    description: Optional[str] = None
     content: Optional[str] = None
+    description: Optional[str] = None
     image_url: Optional[str] = None
     tags: Optional[List[str]] = None
-
-class BlogPostAuthor(BaseModel):
-    id: int
-    name: str
-    avatar: str
+    published: Optional[bool] = None
 
 class BlogPost(BlogPostBase):
     id: int
-    date: datetime
+    slug: str
+    created_at: datetime
+    updated_at: datetime
     reading_time: str
-    author: BlogPostAuthor
+    author: BlogAuthor
 
     class Config:
         from_attributes = True
-
-class BlogPostList(BaseModel):
-    items: List[BlogPost]
-    total: int
-    page: int
-    size: int

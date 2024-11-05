@@ -1,68 +1,46 @@
+import { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import PricingCard from '../components/PricingCard';
-
-const pricingTiers = [
-  {
-    tierId: 'free',
-    name: 'pricing.tier.free',
-    price: 0,
-    stripePriceId: '',
-    features: [
-      { textId: 'pricing.features.applications', values: { count: 2 }, included: true },
-      { textId: 'pricing.features.analytics', values: { type: 'pricing.analytics.basic' }, included: true },
-      { textId: 'pricing.features.support', values: { type: 'pricing.support.community' }, included: true },
-      { textId: 'pricing.features.rateLimit', values: { count: 1000 }, included: true },
-      { textId: 'pricing.features.api', included: false },
-      { textId: 'pricing.features.integrations', included: false },
-    ],
-  },
-  {
-    tierId: 'starter',
-    name: 'pricing.tier.starter',
-    price: 29,
-    stripePriceId: 'price_starter',
-    features: [
-      { textId: 'pricing.features.applications', values: { count: 5 }, included: true },
-      { textId: 'pricing.features.analytics', values: { type: 'pricing.analytics.basic' }, included: true },
-      { textId: 'pricing.features.support', values: { type: 'pricing.support.basic' }, included: true },
-      { textId: 'pricing.features.rateLimit', values: { count: 10000 }, included: true },
-      { textId: 'pricing.features.api', included: false },
-      { textId: 'pricing.features.integrations', included: false },
-    ],
-  },
-  {
-    tierId: 'professional',
-    name: 'pricing.tier.professional',
-    price: 99,
-    stripePriceId: 'price_professional',
-    popular: true,
-    features: [
-      { textId: 'pricing.features.applications', values: { count: -1 }, included: true },
-      { textId: 'pricing.features.analytics', values: { type: 'pricing.analytics.advanced' }, included: true },
-      { textId: 'pricing.features.support', values: { type: 'pricing.support.priority' }, included: true },
-      { textId: 'pricing.features.rateLimit', values: { count: 100000 }, included: true },
-      { textId: 'pricing.features.api', included: true },
-      { textId: 'pricing.features.integrations', included: false },
-    ],
-  },
-  {
-    tierId: 'enterprise',
-    name: 'pricing.tier.enterprise',
-    price: 299,
-    stripePriceId: 'price_enterprise',
-    features: [
-      { textId: 'pricing.features.applications', values: { count: -1 }, included: true },
-      { textId: 'pricing.features.analytics', values: { type: 'pricing.analytics.custom' }, included: true },
-      { textId: 'pricing.features.support', values: { type: 'pricing.support.dedicated' }, included: true },
-      { textId: 'pricing.features.rateLimit', values: { count: -1 }, included: true },
-      { textId: 'pricing.features.api', included: true },
-      { textId: 'pricing.features.integrations', included: true },
-    ],
-  },
-];
+import { tierApi } from '../services/api';
+import { Tier } from '../types/tier';
 
 const Pricing = () => {
   const intl = useIntl();
+  const [tiers, setTiers] = useState<Tier[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTiers = async () => {
+      try {
+        const response = await tierApi.getAll();
+        setTiers(response.data);
+      } catch (err) {
+        console.error('Error fetching tiers:', err);
+        setError(intl.formatMessage({ id: 'error.tiers.fetch' }));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTiers();
+  }, [intl]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 py-24 sm:py-32">
@@ -76,8 +54,22 @@ const Pricing = () => {
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 lg:grid-cols-4">
-          {pricingTiers.map((tier) => (
-            <PricingCard key={tier.tierId} {...tier} />
+          {tiers.map((tier) => (
+            <PricingCard
+              key={tier.id}
+              tierId={tier.id}
+              name={tier.name}
+              price={tier.price}
+              stripePriceId={tier.stripe_price_id}
+              popular={tier.popular}
+              features={tier.products.map(product => ({
+                textId: product.name,
+                values: {
+                  type: product.description
+                },
+                included: true
+              }))}
+            />
           ))}
         </div>
       </div>

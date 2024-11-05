@@ -1,24 +1,33 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
-class PaymentBase(BaseModel):
+class CheckoutSessionResponse(BaseModel):
+    checkout_session_id: str
+    url: str
+
+class PaymentStatus(BaseModel):
+    status: str
+    tier_id: int
+    payment_id: str
+
+class TierSubscription(BaseModel):
+    tier_id: int
+    status: str
+    expires_at: datetime
+
+class PaymentCreate(BaseModel):
+    tier_id: int
+    payment_method_id: Optional[str] = None
     amount: float
+    currency: str = "usd"
 
-class PaymentCreate(PaymentBase):
-    user_id: int
-    tier_id: int
-    stripe_payment_id: str
-
-class PaymentInDB(PaymentBase):
-    id: int
-    user_id: int
-    tier_id: int
-    stripe_payment_id: str
+class Payment(PaymentCreate):
+    id: str
+    user_id: str
+    status: str
     created_at: datetime
-    payment_date: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
-
-class Payment(PaymentInDB):
-    pass

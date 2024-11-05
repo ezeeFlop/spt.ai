@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
-from app.models.tier import tier_product_association
+from app.models.relationships import tier_product_association
 
 class Product(Base):
     __tablename__ = 'products'
@@ -13,3 +13,10 @@ class Product(Base):
     demo_video_link = Column(String, nullable=True)
     frontend_url = Column(String)
     tiers = relationship("Tier", secondary=tier_product_association, back_populates="products")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description
+        }

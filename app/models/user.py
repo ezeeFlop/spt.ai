@@ -1,15 +1,8 @@
-from sqlalchemy import Column, Integer, String, Table, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship, Mapped
 from app.db.base_class import Base
+from app.models.relationships import tier_subscribers
 import datetime
-
-# Association table for many-to-many relationship between User and Tier
-tier_subscribers = Table(
-    'tier_subscribers',
-    Base.metadata,
-    Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-    Column('tier_id', Integer, ForeignKey('tiers.id'), primary_key=True)
-)
 
 class User(Base):
     __tablename__ = "users"
@@ -19,15 +12,15 @@ class User(Base):
     email: Mapped[str] = Column(String, unique=True, index=True, nullable=False)
     name: Mapped[str] = Column(String, nullable=False)
     language: Mapped[str] = Column(String(length=10), nullable=False, server_default='en')
-    max_product_api_calls_per_month: Mapped[int] = Column(Integer, nullable=False, default=100)
-    product_api_calls_this_month: Mapped[int] = Column(Integer, nullable=False, default=0)
+    api_calls_count: Mapped[int] = Column(Integer, nullable=False, default=0)
+    api_max_calls: Mapped[int] = Column(Integer, nullable=False, default=100)
     first_connection: Mapped[datetime.datetime] = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     last_connection: Mapped[datetime.datetime] = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    role: Mapped[str] = Column(String, nullable=False, server_default='user')
     
-    # Add relationships
-    payments = relationship("Payment", back_populates="user")
-    blog_posts = relationship("BlogPost", back_populates="author")
     subscribed_tiers = relationship("Tier", secondary=tier_subscribers, back_populates="subscribers")
+    payments = relationship("Payment", back_populates="user", lazy="select")
+    blog_posts = relationship("BlogPost", back_populates="author", lazy="select")
 
     def to_dict(self):
         return {
@@ -36,6 +29,10 @@ class User(Base):
             "email": self.email,
             "name": self.name,
             "language": self.language,
+            "role": self.role,
+            "api_calls_count": self.api_calls_count,
+            "api_max_calls": self.api_max_calls,
             "first_connection": self.first_connection,
-            "last_connection": self.last_connection
+            "last_connection": self.last_connection,
+            "subscribed_tiers": [tier.name for tier in self.subscribed_tiers],
         }

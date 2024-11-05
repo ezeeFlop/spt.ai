@@ -1,38 +1,40 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.schemas.product import Product, ProductCreate
+from app.models.product import Product
+from app.models.user import User
+from app.schemas.product import Product as ProductSchema, ProductCreate, ProductUpdate
 from app.services import product_service
-from app.core.security import get_current_user
-from typing import List, Optional
-
+from typing import List
+from app.api.deps import admin_required
 router = APIRouter()
 
-@router.post("/", response_model=Product)
-def create_product(product: ProductCreate, db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
-    return product_service.create_product(db, product)
+@router.post("/", response_model=ProductSchema, dependencies=[Depends(admin_required)])
+async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+    return await product_service.create_product(db, product)
 
-@router.get("/", response_model=List[Product])
-def read_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    products = product_service.get_all_products(db, skip=skip, limit=limit)
-    return products
+@router.get("/", response_model=List[ProductSchema])
+async def list_products(db: Session = Depends(get_db)):
+    return await product_service.get_all_products(db)
 
-@router.get("/{product_id}", response_model=Product)
-def read_product(product_id: int, db: Session = Depends(get_db)):
-    db_product = product_service.get_product(db, product_id)
-    if db_product is None:
+@router.put("/{product_id}", response_model=ProductSchema, dependencies=[Depends(admin_required)])
+async def update_product(product_id: int, product: ProductUpdate, db: Session = Depends(get_db)):
+    db_product = await product_service.get_product(db, product_id)
+    if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
-    return db_product
+    return await product_service.update_product(db, db_product, product)
 
-@router.get("/search", response_model=List[Product])
-def search_products(
-    query: str,
-    category: Optional[str] = None,
-    sort_by: Optional[str] = None,
-    db: Session = Depends(get_db)
-):
-    return product_service.search_products(db, query, category, sort_by)
+@router.delete("/{product_id}", response_model=ProductSchema, dependencies=[Depends(admin_required)])
+async def delete_product(product_id: int, db: Session = Depends(get_db)):
+    db_product = await product_service.get_product(db, product_id)
+    if not db_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return await product_service.delete_product(db, db_product)
 
-@router.get("/categories", response_model=List[str])
-def get_categories(db: Session = Depends(get_db)):
-    return product_service.get_categories(db)
+@router.get("/{product_id}", response_model=ProductSchema)
+async def get_product(product_id: int, db: Session = Depends(get_db)):
+    """Get a specific product by ID"""
+    product = await product_service.get_product(db, product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
