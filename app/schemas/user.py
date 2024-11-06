@@ -32,11 +32,12 @@ class User(UserBase):
     api_calls_count: int
     api_max_calls: int
     subscribed_tiers: List[TierInUser] = []
+    tier: Optional[TierWithProducts] = None
 
     class Config:
         from_attributes = True
 
-class UserDetails(BaseModel):
+class UserDetailsResponse(BaseModel):
     id: int
     clerk_id: str
     email: str
@@ -44,8 +45,8 @@ class UserDetails(BaseModel):
     language: str
     role: str
     tier: Optional[TierWithProducts] = None
-    api_calls_count: int = 0
-    api_max_calls: int = 100
+    api_calls_count: int
+    api_max_calls: int
     is_active: bool = True
 
     class Config:

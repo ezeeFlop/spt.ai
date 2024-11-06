@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     CLERK_JWT_AUDIENCE: str = os.getenv("CLERK_JWT_AUDIENCE", "")
     CLERK_JWT_ISSUER: str = os.getenv("CLERK_JWT_ISSUER", "")
     
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    
+    STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET")
+    
     class Config:
         env_file = ".env"
 

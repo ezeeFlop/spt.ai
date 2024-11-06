@@ -1,13 +1,17 @@
 import logging
 from sqlalchemy.orm import Session
 from app.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserUpdate, UserDetailsResponse
 import httpx
 from app.core.config import settings
 from sqlalchemy.orm import joinedload
 from app.models.tier import Tier
 from typing import Optional
 from fastapi import HTTPException
+from app.models.user_subscription import UserSubscription
+from sqlalchemy import select
+from app.services.subscription_service import get_active_subscription, get_active_subscription_response
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -51,9 +55,23 @@ async def create_user(db: Session, user: UserCreate):
     return db_user
 
 async def get_all_users(db: Session):
-    return db.query(User).options(
-        joinedload(User.subscribed_tiers)
-    ).all()
+    users = (
+        db.query(User)
+        .options(
+            joinedload(User.subscribed_tiers),
+            joinedload(User.subscriptions)
+            .joinedload(UserSubscription.tier)
+            .joinedload(Tier.products)
+        )
+        .all()
+    )
+    
+    # Add active subscription tier to each user
+    for user in users:
+        if user.subscriptions and user.subscriptions.is_active:
+            user.tier = user.subscriptions.tier
+    
+    return users
 
 async def update_user(db: Session, db_user: User, user_update: UserUpdate):
     update_data = user_update.model_dump(exclude_unset=True)
@@ -94,56 +112,37 @@ async def is_first_user(db: Session) -> bool:
     user_count = db.query(User).count()
     return user_count == 0
 
-async def get_user_details(db: Session, clerk_id: str):
-    """Get detailed user information including tier"""
-    user = (
-        db.query(User)
-        .options(joinedload(User.subscribed_tiers))
-        .filter(User.clerk_id == clerk_id)
-        .first()
+async def get_user_details(db: AsyncSession, clerk_id: str) -> Optional[UserDetailsResponse]:
+    """Get detailed user information including active subscription and tier"""
+    query = (
+        select(User)
+        .options(joinedload(User.subscriptions))
+        .where(User.clerk_id == clerk_id)
     )
+    result = db.execute(query)
+    user = result.unique().scalar_one_or_none()
     
     if not user:
         return None
     
-    # Get the user's current tier and its products
-    current_tier = None
-    if user.subscribed_tiers:
-        tier = user.subscribed_tiers[0]  # Get first tier
-        current_tier = {
-            "id": tier.id,
-            "name": tier.name,
-            "description": tier.description,
-            "price": tier.price,
-            "billing_period": tier.billing_period,
-            "tokens": tier.tokens,
-            "stripe_price_id": tier.stripe_price_id,
-            "popular": tier.popular,
-            "is_free": tier.is_free,
-            "products": [
-                {
-                    "id": p.id,
-                    "name": p.name,
-                    "description": p.description,
-                    "cover_image": p.cover_image,
-                    "demo_video_link": p.demo_video_link,
-                    "frontend_url": p.frontend_url
-                }
-                for p in tier.products
-            ]
-        }
-    logger.info(f"Current tier: {current_tier} {user.subscribed_tiers}")
-    return {
+    # Get the user's current active subscription and its tier
+    active_subscription = await get_active_subscription_response(db, clerk_id)
+    
+    # Create the response object
+    user_details = {
         "id": user.id,
         "clerk_id": user.clerk_id,
         "email": user.email,
         "name": user.name,
         "language": user.language,
         "role": user.role,
-        "tier": current_tier,
+        "tier": active_subscription.tier if active_subscription else None,
         "api_calls_count": user.api_calls_count,
+        "api_max_calls": user.api_max_calls,
         "is_active": True
     }
+    
+    return UserDetailsResponse.model_validate(user_details)
 
 async def get_user(db: Session, user_id: int) -> Optional[User]:
     """

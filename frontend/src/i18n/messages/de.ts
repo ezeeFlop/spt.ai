@@ -211,5 +211,9 @@ export default {
   'products.accessRequired': 'Abonnement erforderlich',
   'products.subscriptionInfo': 'Bitte abonnieren Sie, um auf diese Funktion zuzugreifen',
   'products.tryIt': 'Jetzt ausprobieren',
-  'admin.tiers.popularWarning': 'Nur ein Tarif kann als beliebt markiert werden'
+  'admin.tiers.popularWarning': 'Nur ein Tarif kann als beliebt markiert werden',
+  'tier.none': 'Keine Stufe',
+  'tier.tokensRemaining': '{remaining} von {total} Token übrig',
+  'pricing.currentPlan': 'Aktueller Plan',
+  'pricing.confirmChange': 'Wenn Sie den Plan ändern, wird Ihr aktuelles Abonnement gekündigt. Möchten Sie fortfahren?'
 }; 

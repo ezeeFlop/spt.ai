@@ -2,6 +2,8 @@ import sys
 import argparse
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
+from sqlalchemy.orm import joinedload
+from datetime import datetime
 
 # Import models in correct order
 from app.models.tier import Tier  # Import Tier first
@@ -25,14 +27,48 @@ def set_user_as_admin(email: str, db: Session) -> bool:
     return True
 
 def list_users(db: Session) -> None:
-    """List all users and their roles"""
-    users = db.query(User).all()
-    print("\nUser List:")
-    print("-" * 50)
-    print(f"{'Email':<30} | {'Role':<10}")
-    print("-" * 50)
+    """List all users and their detailed information"""
+    users = (
+        db.query(User)
+        .all()
+    )
+    
+    print("\nDetailed User List:")
+    print("-" * 100)
+    print(f"{'Email':<30} | {'Role':<10} | {'Current Tier':<20} | {'Last Payment':<20} | {'Status'}")
+    print("-" * 100)
+    
     for user in users:
-        print(f"{user.email:<30} | {user.role:<10}")
+        # Get current tier info
+        current_tier = "No tier"
+        if user.subscribed_tiers:
+            tier = user.subscribed_tiers[0]
+            current_tier = f"{tier.name} (${tier.price})"
+        
+        # Get latest payment info
+        latest_payment = "No payments"
+        payment_status = "-"
+        
+        # Get payments directly from the database to avoid join issues
+        payments = (
+            db.query(Payment)
+            .filter(Payment.user_id == user.clerk_id)
+            .order_by(Payment.created_at.desc())
+            .all()
+        )
+        
+        if payments:
+            latest = payments[0]
+            latest_payment = latest.created_at.strftime("%Y-%m-%d")
+            payment_status = latest.status.value
+        
+        print(
+            f"{user.email:<30} | "
+            f"{user.role:<10} | "
+            f"{current_tier:<20} | "
+            f"{latest_payment:<20} | "
+            f"{payment_status}"
+        )
 
 def main():
     parser = argparse.ArgumentParser(description='Manage user admin roles')

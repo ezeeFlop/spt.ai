@@ -15,7 +15,10 @@ const BlogIndex = () => {
   React.useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await blogApi.getAllPosts({ limit: 10 });
+        const response = await blogApi.getAllPosts({ 
+          limit: 10,
+          published: true
+        });
         setPosts(response.data.items);
       } catch (err) {
         console.error('Error fetching blog posts:', err);

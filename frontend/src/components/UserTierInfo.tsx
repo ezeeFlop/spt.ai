@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { authApi } from '../services/api';
 import { useIntl } from 'react-intl';
+import { TierBadge } from './TierBadge';
 
 const UserTierInfo: React.FC = () => {
   const { userId } = useAuth();
@@ -35,9 +36,10 @@ const UserTierInfo: React.FC = () => {
           <span className="text-sm text-gray-600">
             {intl.formatMessage({ id: 'user.account.tier' })}
           </span>
-          <span className="font-medium text-gray-900">
-            {tier || intl.formatMessage({ id: 'loading' })}
-          </span>
+          <TierBadge 
+            tierName={tier}
+            tokensLeft={counter}
+          />
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600">

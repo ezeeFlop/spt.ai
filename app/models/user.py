@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship, Mapped
 from app.db.base_class import Base
-from app.models.relationships import tier_subscribers
 import datetime
+from app.models.relationships import tier_subscribers
 
 class User(Base):
     __tablename__ = "users"
@@ -18,7 +18,20 @@ class User(Base):
     last_connection: Mapped[datetime.datetime] = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
     role: Mapped[str] = Column(String, nullable=False, server_default='user')
     
-    subscribed_tiers = relationship("Tier", secondary=tier_subscribers, back_populates="subscribers")
+    # Relationships
+    subscribed_tiers = relationship(
+        "Tier",
+        secondary=tier_subscribers,
+        back_populates="subscribers",
+        lazy="select"
+    )
+    subscriptions = relationship(
+        "UserSubscription",
+        back_populates="user",
+        primaryjoin="User.clerk_id==UserSubscription.user_id",
+        uselist=False,
+        lazy="select"
+    )
     payments = relationship("Payment", back_populates="user", lazy="select")
     blog_posts = relationship("BlogPost", back_populates="author", lazy="select")
 
@@ -34,5 +47,6 @@ class User(Base):
             "api_max_calls": self.api_max_calls,
             "first_connection": self.first_connection,
             "last_connection": self.last_connection,
-            "subscribed_tiers": [tier.name for tier in self.subscribed_tiers],
+            "subscribed_tiers": [tier.to_dict() for tier in self.subscribed_tiers],
+            "active_subscription": self.subscriptions.to_dict() if self.subscriptions else None
         }

@@ -39,7 +39,8 @@ const BlogEditor: React.FC = () => {
   const handleSubmit = async (data: BlogPostCreate | BlogPostUpdate) => {
     try {
       if (slug) {
-        await blogApi.updatePost(slug, data);
+        const currentPost = await blogApi.getPostBySlug(slug);
+        await blogApi.updatePost(currentPost.data.id, data);
       } else {
         await blogApi.createPost(data);
       }

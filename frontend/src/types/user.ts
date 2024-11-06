@@ -1,3 +1,5 @@
+import { TierInUser, TierWithProducts } from "./tier";
+
 export interface User {
   id: number;
   clerk_id: string;
@@ -10,6 +12,7 @@ export interface User {
   api_calls_count: number;
   api_max_calls: number;
   subscribed_tiers: TierInUser[];
+  tier?: TierWithProducts;
 }
 
 export interface UserDetails {

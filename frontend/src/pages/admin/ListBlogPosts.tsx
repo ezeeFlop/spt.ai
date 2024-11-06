@@ -14,6 +14,7 @@ const ListBlogPosts: React.FC = () => {
     const fetchPosts = async () => {
       try {
         const response = await blogApi.getAllPosts({ limit: 100 });
+        console.log("admin Blog", response.data);
         setPosts(response.data.items);
       } catch (error) {
         console.error('Error fetching posts:', error);

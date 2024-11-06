@@ -27,11 +27,17 @@ const ProductDetail = () => {
         setProduct(productResponse.data);
         
         if (isSignedIn) {
-          const userDetails = await userApi.getMyDetails();
-          console.log(userDetails);
-          setHasAccess(
-            userDetails?.tier?.products?.some(p => p.id.toString() === id) || false
+          const userDetails = (await userApi.getMyDetails()).data;
+          console.log('User Details:', userDetails);
+          console.log('User Tier Products:', userDetails?.tier?.products);
+          console.log('Current Product ID:', id);
+          
+          const hasProductAccess = userDetails?.tier?.products?.some(
+            p => p.id.toString() === id.toString()
           );
+          
+          console.log('Has Access:', hasProductAccess);
+          setHasAccess(hasProductAccess || false);
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -67,7 +73,9 @@ const ProductDetail = () => {
       </div>
     );
   }
+  console.log(hasAccess);
 
+  // If user has access, show the product interface
   if (hasAccess) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -88,11 +96,12 @@ const ProductDetail = () => {
     );
   }
 
+  // If user doesn't have access, show the product summary
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          {/* Hero Section */}
+          {/* Product Summary */}
           <div className="relative">
             {product.cover_image && (
               <div className="aspect-w-16 aspect-h-9">
@@ -110,12 +119,10 @@ const ProductDetail = () => {
           </div>
 
           <div className="p-8">
-            {/* Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Main Content */}
               <div className="lg:col-span-2">
                 <div className="prose prose-lg max-w-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown-body">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {product.description}
                   </ReactMarkdown>
                 </div>
@@ -123,13 +130,13 @@ const ProductDetail = () => {
                 {product.demo_video_link && (
                   <div className="mt-8">
                     <h2 className="text-xl font-semibold mb-4">
-                      {intl.formatMessage({ id: 'products.demo' })}
+                      {intl.formatMessage({ id: 'products.demoVideo' })}
                     </h2>
-                    <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+                    <div className="aspect-w-16 aspect-h-9">
                       <iframe
                         src={product.demo_video_link}
                         title="Product Demo"
-                        className="w-full h-full"
+                        className="w-full h-full rounded-lg"
                         allowFullScreen
                       />
                     </div>
@@ -137,7 +144,6 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Sidebar */}
               <div className="lg:col-span-1">
                 <div className="bg-gray-50 rounded-lg p-6">
                   <div className="flex items-center mb-4">

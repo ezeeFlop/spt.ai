@@ -3,25 +3,29 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.user import User as UserModel
-from app.schemas.user import User as UserSchema, UserCreate, UserUpdate, UserDetails
+from app.schemas.user import User as UserSchema, UserCreate, UserUpdate, UserDetailsResponse
 from app.services import user_service
 from typing import List, Dict
 import logging
 from app.api.deps import get_current_user, admin_required
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import status
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-@router.get("/me", response_model=UserDetails)
-async def get_my_details(
-    db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user)
+@router.get("/me", response_model=UserDetailsResponse)
+async def get_current_user_details(
+    db: AsyncSession = Depends(get_db),
+    current_user: str = Depends(get_current_user)
 ):
-    """Get current user's detailed information including their tier and products"""
     user_details = await user_service.get_user_details(db, current_user.clerk_id)
     if not user_details:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
     return user_details
 
 @router.post("/", response_model=UserSchema)

@@ -2,10 +2,17 @@ export interface UserSubscription {
   id: number;
   user_id: string;
   tier_id: number;
-  status: 'active' | 'inactive';
-  expires_at: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface TierSubscription {
+  tier_id: number;
+  status: string;
+  expires_at: string;
 }
 
 export interface CheckoutSessionResponse {

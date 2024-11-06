@@ -211,5 +211,9 @@ export default {
   'products.accessRequired': 'Suscripción requerida',
   'products.subscriptionInfo': 'Por favor suscríbase para acceder a esta función',
   'products.tryIt': 'Pruébelo ahora',
-  'admin.tiers.popularWarning': 'Solo un nivel puede ser marcado como popular'
+  'admin.tiers.popularWarning': 'Solo un nivel puede ser marcado como popular',
+  'tier.none': 'Sin nivel',
+  'tier.tokensRemaining': '{remaining} de {total} tokens restantes',
+  'pricing.currentPlan': 'Plan Actual',
+  'pricing.confirmChange': '¿Cambiar de plan cancelará tu suscripción actual. ¿Deseas continuar?'
 }; 

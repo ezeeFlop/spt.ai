@@ -108,6 +108,7 @@ export const blogApi = {
     tag?: string; 
     search?: string;
     authorId?: number;
+    published?: boolean;
   }) => api.get<PaginatedResponse<BlogPost>>('/blog', { params }),
   
   getPostBySlug: (slug: string) => 
@@ -116,8 +117,8 @@ export const blogApi = {
   createPost: (post: BlogPostCreate) => 
     api.post<BlogPost>('/blog', post),
   
-  updatePost: (slug: string, post: BlogPostUpdate) => 
-    api.put<BlogPost>(`/blog/${slug}`, post),
+  updatePost: (blogId: number, post: BlogPostUpdate) => 
+    api.put<BlogPost>(`/blog/${blogId}`, post),
   
   deletePost: (slug: string) => 
     api.delete(`/blog/${slug}`),
@@ -138,23 +139,13 @@ export const statsApi = {
 };
 
 export const subscriptionApi = {
-  createCheckoutSession: async (tierId: number): Promise<CheckoutSessionResponse> => {
-    if (!tierId) {
-      throw new Error('Tier ID is required');
-    }
-    const response = await api.post<CheckoutSessionResponse>(
-      `/payments/create-checkout-session/${tierId}`
-    );
-    return response.data;
-  },
-  
-  registerFreeTier: async (): Promise<UserSubscription> => {
-    const response = await api.post<UserSubscription>('/payments/register-free-tier');
+  getCurrentSubscription: async () => {
+    const response = await api.get<UserSubscription>('/payments/current-subscription');
     return response.data;
   },
 
-  getCurrentSubscription: async (): Promise<UserSubscription> => {
-    const response = await api.get<UserSubscription>('/payments/current-subscription');
+  registerFreeTier: async () => {
+    const response = await api.post<UserSubscription>('/payments/register-free-tier');
     return response.data;
   }
 };

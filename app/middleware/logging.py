@@ -18,9 +18,9 @@ async def log_request_middleware(request: Request, call_next: Callable) -> Respo
     client_ip = request.client.host if request.client else None
     user_agent = request.headers.get('User-Agent')
 
-    # Log request
-    logger.info(
-        f"Request started",
+    # Log request at DEBUG level instead of INFO
+    logger.debug(
+        f"Request started - {method} {url}",
         extra={
             "request_id": request_id,
             "method": method,
@@ -38,9 +38,9 @@ async def log_request_middleware(request: Request, call_next: Callable) -> Respo
     # Calculate processing time
     process_time = time.time() - start_time
     
-    # Log response
-    logger.info(
-        f"Request completed",
+    # Log response at DEBUG level instead of INFO
+    logger.debug(
+        f"Request completed - {method} {url} - Status: {response.status_code}",
         extra={
             "request_id": request_id,
             "method": method,

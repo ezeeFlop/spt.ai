@@ -64,6 +64,8 @@ export default {
   'pricing.cta.paid': 'Get started',
   'pricing.period.free': 'Forever Free',
   'pricing.period.paid': '/month',
+  'pricing.period.monthly': '/month',
+  'pricing.period.yearly': '/year',
   
   'faq.title': 'Frequently Asked Questions',
   'faq.question.applications': 'What types of AI applications are available?',
@@ -188,7 +190,12 @@ export default {
   
   'admin.products.frontendUrl': 'Frontend URL',
   'admin.products.confirmDelete': 'Are you sure you want to delete this product?',
-  'pricing.unlimited': 'Unlimited',
+  'pricing.unlimited': 'Unlimited Tokens',
+  'pricing.tokens': '{count} Tokens',
+  'pricing.period.monthly': 'month',
+  'pricing.period.yearly': 'year',
+  'pricing.period.free': 'Free Forever',
+  'pricing.availableProducts': 'Available Products',
   'admin.products.demoVideo': 'Demo Video',
   'admin.products.coverImage': 'Cover Image',
   
@@ -227,5 +234,9 @@ export default {
   'admin.blog.form.tags': 'Tags',
   'admin.blog.form.published': 'Published',
   'admin.blog.form.create': 'Create Post',
-  'admin.blog.form.update': 'Update Post'
+  'admin.blog.form.update': 'Update Post',
+  'tier.none': 'No Tier',
+  'tier.tokensRemaining': '{remaining} of {total} tokens remaining',
+  'pricing.currentPlan': 'Current Plan',
+  'pricing.confirmChange': 'Changing plans will cancel your current subscription. Do you want to continue?'
 }; 

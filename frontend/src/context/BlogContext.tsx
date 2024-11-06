@@ -45,8 +45,10 @@ export const BlogProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const response = await blogApi.getAllPosts({
           limit: LIMIT,
           skip: 0,
+          published: true,
           tag: selectedTag || undefined
         });
+        console.log("Blog", response.data);
         setPosts(response.data.items);
         setHasMore(response.data.items.length === LIMIT);
         setPage(1);

@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useUserRole } from '../hooks/useUserRole';
 import { FormattedMessage } from 'react-intl';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { role, isLoading } = useUserRole();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && role === 'admin') {
+      navigate('/dashboard/statistics');
+    }
+  }, [isLoading, role, navigate]);
 
   if (isLoading) {
     return (
@@ -25,14 +33,7 @@ const Dashboard = () => {
     );
   }
 
-  return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        <FormattedMessage id="dashboard.title" />
-      </h1>
-      {/* Add welcome content or dashboard overview here */}
-    </div>
-  );
+  return null;
 };
 
 export default Dashboard; 

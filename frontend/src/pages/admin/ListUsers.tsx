@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { userApi, tierApi } from '../../services/api';
+import { userApi, tierApi, subscriptionApi, paymentApi } from '../../services/api';
 import { User, UserUpdate } from '../../types/user';
 import { Tier } from '../../types/tier';
 import { toast } from 'react-hot-toast';
@@ -18,6 +18,7 @@ const ListUsers: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const response = await userApi.getAll();
+      console.log(response.data);
       setUsers(response.data);
     } catch (error) {
       toast.error('Failed to fetch users');
@@ -40,6 +41,29 @@ const ListUsers: React.FC = () => {
       fetchUsers(); // Refresh the list
     } catch (error) {
       toast.error('Failed to update user');
+    }
+  };
+
+  const handleTierChange = async (userId: number, tierId: number) => {
+    try {
+      const selectedTier = tiers.find(t => t.id === tierId);
+      if (!selectedTier) {
+        throw new Error('Invalid tier selected');
+      }
+
+      if (selectedTier.is_free) {
+        await subscriptionApi.registerFreeTier();
+      } else {
+        const { url } = await paymentApi.createCheckoutSession(tierId);
+        window.location.href = url;
+        return; // Exit early as we're redirecting
+      }
+
+      await fetchUsers(); // Refresh the list to get updated tier info
+      toast.success(intl.formatMessage({ id: 'admin.users.success.update' }));
+    } catch (error) {
+      console.error('Error updating tier:', error);
+      toast.error(intl.formatMessage({ id: 'admin.users.error.update' }));
     }
   };
 
@@ -80,13 +104,13 @@ const ListUsers: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
-                          value={user.subscribed_tiers[0]?.name || ''}
-                          onChange={(e) => handleUpdateUser(user.id, { tier: e.target.value })}
+                          value={user.tier?.id || ''}
+                          onChange={(e) => handleTierChange(user.id, parseInt(e.target.value))}
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
                           <option value="">No tier</option>
                           {tiers.map((tier) => (
-                            <option key={tier.id} value={tier.name}>
+                            <option key={tier.id} value={tier.id}>
                               {tier.name}
                             </option>
                           ))}

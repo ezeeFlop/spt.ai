@@ -62,6 +62,8 @@ const Pricing = () => {
               price={tier.price}
               stripePriceId={tier.stripe_price_id}
               popular={tier.popular}
+              tokens={tier.tokens}
+              billing_period={tier.billing_period}
               features={tier.products.map(product => ({
                 textId: product.name,
                 values: {
