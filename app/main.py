@@ -15,12 +15,18 @@ from app.middleware.error_handler import (
 )
 from app.middleware.validation import request_validation_middleware
 from app.middleware.logging import log_request_middleware
+from app.middleware.cors import setup_cors
+from fastapi.staticfiles import StaticFiles
+import os
 
 # Setup logging
 setup_logging()
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
+
+# Create upload directory if it doesn't exist
+os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -31,19 +37,16 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# Mount static files directory
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+
 # Add middlewares
 app.middleware("http")(error_handler_middleware)
 app.middleware("http")(request_validation_middleware)
 app.middleware("http")(log_request_middleware)
 
 # Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+setup_cors(app)
 
 # Exception handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

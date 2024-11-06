@@ -215,5 +215,7 @@ export default {
   'tier.none': 'Keine Stufe',
   'tier.tokensRemaining': '{remaining} von {total} Token übrig',
   'pricing.currentPlan': 'Aktueller Plan',
-  'pricing.confirmChange': 'Wenn Sie den Plan ändern, wird Ihr aktuelles Abonnement gekündigt. Möchten Sie fortfahren?'
+  'pricing.confirmChange': 'Wenn Sie den Plan ändern, wird Ihr aktuelles Abonnement gekündigt. Möchten Sie fortfahren?',
+  'admin.media.confirmDelete': 'Sind Sie sicher, dass Sie diese Datei löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.',
+  'admin.media.error.delete': 'Fehler beim Löschen der Datei',
 }; 

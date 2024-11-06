@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 import os
+from typing import List
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Sponge-Theory.ai API"
@@ -22,6 +23,22 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
     
     STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET")
+    
+    # Media settings
+    UPLOAD_DIR: str = "uploads"
+    SERVER_HOST: str = os.getenv("SERVER_HOST", "http://localhost:8000")
+    ALLOWED_EXTENSIONS: dict = {
+        'image': {'png', 'jpg', 'jpeg', 'gif', 'webp'},
+        'video': {'mp4', 'webm', 'mov'},
+        'document': {'pdf'}
+    }
+    MAX_FILE_SIZE: dict = {
+        'image': 5_000_000,      # 5MB
+        'video': 100_000_000,    # 100MB
+        'document': 10_000_000   # 10MB
+    }
+    
+    PRODUCT_ACCESS_SECRET: str = ""
     
     class Config:
         env_file = ".env"

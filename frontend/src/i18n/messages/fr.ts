@@ -218,4 +218,6 @@ export default {
   'pricing.period.yearly': 'an',
   'pricing.period.free': 'Gratuit à vie',
   'pricing.availableProducts': 'Produits Disponibles',
+  'admin.media.confirmDelete': 'Êtes-vous sûr de vouloir supprimer ce fichier ? Cette action ne peut pas être annulée.',
+  'admin.media.error.delete': 'Erreur lors de la suppression du fichier',
 }; 

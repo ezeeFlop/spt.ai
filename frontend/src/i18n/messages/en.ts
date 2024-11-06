@@ -126,6 +126,7 @@ export default {
   'dashboard.menu.products': 'Products',
   'dashboard.menu.statistics': 'Statistics',
   'dashboard.menu.blog': 'Blog Posts',
+  'dashboard.menu.media': 'Media Library',
   
   'navigation.dashboard': 'Dashboard',
   
@@ -192,9 +193,6 @@ export default {
   'admin.products.confirmDelete': 'Are you sure you want to delete this product?',
   'pricing.unlimited': 'Unlimited Tokens',
   'pricing.tokens': '{count} Tokens',
-  'pricing.period.monthly': 'month',
-  'pricing.period.yearly': 'year',
-  'pricing.period.free': 'Free Forever',
   'pricing.availableProducts': 'Available Products',
   'admin.products.demoVideo': 'Demo Video',
   'admin.products.coverImage': 'Cover Image',
@@ -238,5 +236,7 @@ export default {
   'tier.none': 'No Tier',
   'tier.tokensRemaining': '{remaining} of {total} tokens remaining',
   'pricing.currentPlan': 'Current Plan',
-  'pricing.confirmChange': 'Changing plans will cancel your current subscription. Do you want to continue?'
+  'pricing.confirmChange': 'Changing plans will cancel your current subscription. Do you want to continue?',
+  'admin.media.confirmDelete': 'Are you sure you want to delete this file? This action cannot be undone.',
+  'admin.media.error.delete': 'Error deleting file',
 }; 

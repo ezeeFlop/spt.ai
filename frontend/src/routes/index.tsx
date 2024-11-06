@@ -15,6 +15,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import DashboardStats from '../pages/admin/DashboardStats';
 import ListBlogPosts from '../pages/admin/ListBlogPosts';
 import BlogEditor from '../pages/admin/BlogEditor';
+import MediaLibrary from '../pages/admin/MediaLibrary';
 
 const AppRoutes = () => {
   return (
@@ -36,6 +37,7 @@ const AppRoutes = () => {
         <Route path="blog" element={<ListBlogPosts />} />
         <Route path="blog/new" element={<BlogEditor />} />
         <Route path="blog/:slug/edit" element={<BlogEditor />} />
+        <Route path="media" element={<MediaLibrary />} />
       </Route>
     </Routes>
   );

@@ -4,7 +4,7 @@ from app.schemas.product import ProductCreate, ProductUpdate
 from fastapi import HTTPException
 
 async def create_product(db: Session, product_data: ProductCreate):
-    product = Product(**product_data.dict())
+    product = Product(**product_data.model_dump())
     db.add(product)
     db.commit()
     db.refresh(product)
@@ -16,7 +16,7 @@ async def get_all_products(db: Session):
 async def update_product(db: Session, product_id: int, product_data: ProductUpdate):
     product = db.query(Product).filter(Product.id == product_id).first()
     if product:
-        for key, value in product_data.dict().items():
+        for key, value in product_data.model_dump().items():
             setattr(product, key, value)
         db.commit()
         db.refresh(product)

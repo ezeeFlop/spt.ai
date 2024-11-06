@@ -149,3 +149,26 @@ export const subscriptionApi = {
     return response.data;
   }
 };
+
+interface MediaFile {
+  url: string;
+  filename: string;
+  type: 'image' | 'video' | 'document';
+  size: number;
+  created_at: string;
+}
+
+export const mediaApi = {
+  upload: (type: 'image' | 'video' | 'document', formData: FormData) =>
+    api.post<{ url: string }>(`/media/upload/${type}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }),
+  
+  listFiles: (type: 'image' | 'video' | 'document') =>
+    api.get<MediaFile[]>(`/media/files/${type}`),
+    
+  deleteFile: (type: 'image' | 'video' | 'document', filename: string) =>
+    api.delete(`/media/${type}/${filename}`),
+};

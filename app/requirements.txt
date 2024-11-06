@@ -17,3 +17,5 @@ httpx
 python-slugify
 colorlog
 colorama
+aiofiles
+python-multipart

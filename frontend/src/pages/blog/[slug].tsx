@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { blogApi } from '../../services/api';
 import { BlogPost } from '../../types/blog';
+import BlogPostComponent from '../../components/BlogPost';
 
 export const BlogPostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -47,45 +48,20 @@ export const BlogPostPage: React.FC = () => {
   }
 
   return (
-    <article className="container mx-auto px-4 py-8 max-w-4xl">
-      {post.image_url && (
-        <img 
-          src={post.image_url} 
-          alt={post.title}
-          className="w-full h-[400px] object-cover rounded-lg mb-8"
-        />
-      )}
-      
-      <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-      
-      <div className="flex items-center gap-4 mb-8">
-        <img 
-          src={post.author.avatar} 
-          alt={post.author.name}
-          className="w-12 h-12 rounded-full"
-        />
-        <div>
-          <p className="font-medium">{post.author.name}</p>
-          <p className="text-sm text-gray-600">
-            {new Date(post.created_at).toLocaleDateString()} · {post.reading_time}
-          </p>
-        </div>
-      </div>
-      
-      <div className="prose prose-lg max-w-none">
-        {post.content}
-      </div>
-      
-      <div className="flex flex-wrap gap-2 mt-8">
-        {post.tags.map(tag => (
-          <span 
-            key={tag}
-            className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-    </article>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <BlogPostComponent
+        frontMatter={{
+          title: post.title,
+          date: post.created_at,
+          author: {
+            name: post.author.name,
+            avatar: post.author.avatar_url || '/images/default-avatar.png'
+          },
+          readingTime: post.reading_time,
+          tags: post.tags
+        }}
+        content={post.content}
+      />
+    </div>
   );
 };

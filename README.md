@@ -187,3 +187,57 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For more information, visit our [official website](https://www.sponge-theory.ai) or contact our support team at support@sponge-theory.ai.
 
 Happy learning with Sponge-Theory.ai! 🧽🧠
+
+# Stripe Webhook
+# Install Stripe CLI (macOS)
+brew install stripe/stripe-cli/stripe
+
+# Login to Stripe
+stripe login
+
+# Forward webhooks to your local server
+stripe listen --forward-to localhost:8000/api/v1/payments/webhook
+
+# Product site security : 
+
+````
+
+// Product site verification script
+const verifyAccess = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('access_token');
+    
+    if (!token) {
+        window.location.href = '/unauthorized';
+        return;
+    }
+    
+    try {
+        const response = await fetch('https://your-api.com/api/v1/products/verify-access', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Origin': window.location.origin
+            },
+            body: JSON.stringify({ token })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Unauthorized');
+        }
+        
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Initialize application
+        const { user_id, product_id } = await response.json();
+        initializeApp(user_id, product_id);
+        
+    } catch (error) {
+        window.location.href = '/unauthorized';
+    }
+};
+
+document.addEventListener('DOMContentLoaded', verifyAccess);
+
+```

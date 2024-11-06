@@ -4,6 +4,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import LayersIcon from '@mui/icons-material/Layers';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import PermMediaIcon from '@mui/icons-material/PermMedia';
 import { FormattedMessage } from 'react-intl';
 import { FileText } from 'lucide-react';
 import { TierBadge } from '../components/TierBadge';
@@ -66,6 +67,17 @@ const DashboardLayout: React.FC = () => {
               <FileText className="mr-2 h-5 w-5" />
               <span>
                 <FormattedMessage id="dashboard.menu.blog" />
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard/media"
+              className="flex items-center text-gray-700 hover:text-primary-600 transition-colors duration-200"
+            >
+              <PermMediaIcon className="mr-2" />
+              <span>
+                <FormattedMessage id="dashboard.menu.media" />
               </span>
             </Link>
           </li>

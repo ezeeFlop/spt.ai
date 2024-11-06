@@ -11,8 +11,13 @@ async def request_validation_middleware(request: Request, call_next: Callable):
     # Log incoming request
     logger.info(f"Incoming request: {request.method} {request.url}")
     
+    # Allow access to static files and documentation
+    allowed_paths = ["/docs", "/redoc", "/openapi.json", "/", "/uploads"]
+    if any(request.url.path.startswith(path) for path in allowed_paths):
+        return await call_next(request)
+    
     # Validate API version
-    if not request.url.path.startswith(settings.API_V1_STR) and not request.url.path in ["/docs", "/redoc", "/openapi.json", "/"]:
+    if not request.url.path.startswith(settings.API_V1_STR):
         logger.warning(f"Invalid API version requested: {request.url.path}")
         return JSONResponse(
             status_code=404,
