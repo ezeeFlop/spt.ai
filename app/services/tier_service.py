@@ -4,8 +4,33 @@ from app.models.tier import Tier
 from app.schemas.tier import TierCreate, TierUpdate
 from app.models.product import Product
 import logging
+import stripe
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+async def update_stripe_product_description(stripe_price_id: str, description: str, products: list):
+    """Update Stripe product description"""
+    try:
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        price = stripe.Price.retrieve(
+            stripe_price_id,
+            expand=['product']
+        )
+        
+        # Format products list
+        product_names = [p.name for p in products]
+        product_list = "\n- ".join(product_names)
+        full_description = f"{description}\n\nIncluded Products:\n- {product_list}"
+        
+        # Update the product description
+        stripe.Product.modify(
+            price.product.id,
+            description=full_description
+        )
+    except stripe.error.StripeError as e:
+        logger.error(f"Failed to update Stripe product description: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 async def create_tier(db: Session, tier_data: TierCreate):
     logger.info(f"Creating tier with data: {tier_data.model_dump()}")
@@ -37,6 +62,14 @@ async def create_tier(db: Session, tier_data: TierCreate):
     if product_ids:
         products = db.query(Product).filter(Product.id.in_(product_ids)).all()
         tier.products.extend(products)
+        
+        # Update Stripe product description if it's a paid tier
+        if tier.stripe_price_id:
+            await update_stripe_product_description(
+                tier.stripe_price_id,
+                tier.description,
+                products
+            )
     
     db.commit()
     db.refresh(tier)
@@ -57,7 +90,7 @@ async def update_tier(db: Session, tier_id: int, tier_data: TierUpdate):
         
         # Extract product_ids before updating the tier
         product_ids = tier_data.product_ids
-        update_data = tier_data.dict(exclude={'product_ids'}, exclude_unset=True)
+        update_data = tier_data.model_dump(exclude={'product_ids'}, exclude_unset=True)
         
         # Update tier fields
         for key, value in update_data.items():
@@ -67,6 +100,14 @@ async def update_tier(db: Session, tier_id: int, tier_data: TierUpdate):
         if product_ids is not None:
             products = db.query(Product).filter(Product.id.in_(product_ids)).all()
             tier.products = products
+            
+            # Update Stripe product description if it's a paid tier
+            if tier.stripe_price_id:
+                await update_stripe_product_description(
+                    tier.stripe_price_id,
+                    tier.description,
+                    products
+                )
         
         db.commit()
         db.refresh(tier)

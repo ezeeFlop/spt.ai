@@ -71,7 +71,7 @@ To get started with Sponge-Theory.ai, you'll need Node.js (version 14 or later) 
 
 1. Navigate to the backend directory:
    ```
-   cd backend
+   cd app
    ```
 
 2. Create a virtual environment and activate it:
@@ -125,12 +125,35 @@ To get started with Sponge-Theory.ai, you'll need Node.js (version 14 or later) 
    ```
    npm run lint
    ```
+5. Build the project:
+   ```
+   npm run build
+   ```
+6. Docker build:
+   ```
+   docker build -t spt.ai .
+   ```
+7. Docker run:
+   ```
+docker run -p 80:80 \
+  -e VITE_API_BASE_URL=http://localhost:8000/api/v1 \
+  -e VITE_CLERK_PUBLISHABLE_KEY=your_clerk_key \
+  -e VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_key \
+  spt.ai
+   ```
 
 ### Backend
 
 1. Start the backend server:
    ```
    uvicorn main:app --reload
+   ```
+
+2. Start the celery worker:
+
+   ```
+celery -A app.celery_app worker --loglevel=info
+celery -A app.celery_app beat --loglevel=info
    ```
 
 The API will be available at `http://localhost:8000`. You can access the interactive API documentation at `http://localhost:8000/docs`.
