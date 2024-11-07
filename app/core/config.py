@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET")
     
     # Media settings
-    UPLOAD_DIR: str = "uploads"
+    UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", "uploads")
     SERVER_HOST: str = os.getenv("SERVER_HOST", "http://localhost:8000")
     ALLOWED_EXTENSIONS: dict = {
         'image': {'png', 'jpg', 'jpeg', 'gif', 'webp'},

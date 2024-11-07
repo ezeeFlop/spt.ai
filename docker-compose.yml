@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: spongetheory/spt-ai-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+
+  api:
+    image: spongetheory/spt-ai-api
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # From config.py
+      POSTGRES_SERVER: postgres
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      
+      CLERK_SECRET_KEY: "${CLERK_SECRET_KEY}"
+      CLERK_JWKS_URL: "${CLERK_JWKS_URL}"
+      CLERK_JWT_AUDIENCE: "${CLERK_JWT_AUDIENCE}"
+      CLERK_JWT_ISSUER: "${CLERK_JWT_ISSUER}"
+      UPLOAD_DIR: "${UPLOAD_DIR}"
+      FRONTEND_URL: "http://frontend"
+      
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+      
+      SERVER_HOST: "http://api:8000"
+      
+      PRODUCT_ACCESS_SECRET: "${PRODUCT_ACCESS_SECRET}"
+      
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      CELERY_RESULT_BACKEND: "redis://redis:6379/0"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - app-network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  redis:
+    image: redis:alpine
+    networks:
+      - app-network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+networks:
+  app-network:
+    driver: overlay
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /dashboard/
+Disallow: /admin/
+Allow: /blog/
+Allow: /features/
+Allow: /pricing/
+Allow: /products/
+Sitemap: https://www.sponge-theory.ai/sitemap.xml

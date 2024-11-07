@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useIntl } from 'react-intl';
-import { Upload, X, Image, FileVideo, FileText } from 'lucide-react';
+import { X, Image, FileVideo, FileText } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { mediaApi } from '../../services/api';
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useUserRole } from '../hooks/useUserRole';
 import { FormattedMessage } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
