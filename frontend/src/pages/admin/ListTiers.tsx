@@ -5,6 +5,7 @@ import { tierApi, productApi } from '../../services/api';
 import { Tier, Product } from '../../types';
 import TierModal from '../../components/TierModal';
 import { TierResponse } from '../../types/api';
+import { formatCurrency } from '../../utils/currency';
 
 const ListTiers: React.FC = () => {
   const [tiers, setTiers] = useState<Tier[]>([]);
@@ -135,7 +136,9 @@ const ListTiers: React.FC = () => {
             {tiers.map(tier => (
               <tr key={tier.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{tier.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">${tier.price}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {formatCurrency(tier.price, tier.currency || 'USD')}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">{tier.billing_period}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{tier.tokens}</td>
                 <td className="px-6 py-4">

@@ -8,6 +8,8 @@ import { useIntl } from 'react-intl';
 import { useUserRole } from '../hooks/useUserRole';
 import LanguageSelector from './LanguageSelector';
 import { Product } from '../types/index';
+import { useMenuPosts } from '../hooks/useMenuPosts';
+import { BlogMenuItems } from './BlogMenuItems';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isSignedIn, userId } = useAuth();
@@ -15,6 +17,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { products, loading } = useProducts();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const intl = useIntl();
+  const { menuPosts, loading: menuPostsLoading } = useMenuPosts();
 
   const getProductCategory = (product: Product) => {
     if (product.category) {
@@ -79,9 +82,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 <Link to="/pricing" className="text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium">
                   {intl.formatMessage({ id: 'app.nav.pricing' })}
                 </Link>
-                <Link to="/blog" className="text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium">
-                  {intl.formatMessage({ id: 'app.nav.blog' })}
-                </Link>
+                <div className="relative group">
+                  <BlogMenuItems />
+                </div>
                 {isSignedIn && role === 'admin' && (
                   <Link to="/dashboard" className="text-gray-900 hover:text-primary-600 px-3 py-2 text-sm font-medium">
                     {intl.formatMessage({ id: 'app.nav.dashboard' })}
@@ -180,12 +183,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               >
                 {intl.formatMessage({ id: 'app.nav.pricing' })}
               </Link>
-              <Link
-                to="/blog"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50"
-              >
-                {intl.formatMessage({ id: 'app.nav.blog' })}
-              </Link>
+              <div className="relative group">
+                <BlogMenuItems />
+              </div>
               {isSignedIn && role === 'admin' && (
                 <Link
                   to="/dashboard"

@@ -6,6 +6,8 @@ import { Tier, TierCreate, TierUpdate } from '../types/tier';
 import { BlogPost, BlogPostCreate, BlogPostUpdate } from '../types/blog';
 import { PaymentStatus, TierSubscription } from '../types/payment';
 import { UserSubscription } from '../types/subscription';
+import { StripePrice } from '../types/stripe';
+import { MediaFile } from '../types/media';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 
@@ -125,17 +127,24 @@ export const blogApi = {
     
   getPopularTags: (limit?: number) => 
     api.get<string[]>('/blog/tags', { params: { limit } }),
+  getMenuPosts: () => api.get<BlogPost[]>('/blog/menu'),
 };
 
 export const statsApi = {
-  getUserStats: (timeRange: 'week' | 'month' | 'year') => 
-    api.get(`/stats/users/${timeRange}`),
-  
-  getRevenueStats: (timeRange: 'week' | 'month' | 'year') => 
-    api.get(`/stats/revenue/${timeRange}`),
-  
-  getTotalRevenue: () => 
-    api.get('/stats/revenue')
+  getUserStats: async (timeRange: string) => {
+    const response = await api.get(`/stats/users/${timeRange}`);
+    return response.data;
+  },
+
+  getRevenueStats: async (timeRange: string) => {
+    const response = await api.get(`/stats/revenue/${timeRange}`);
+    return response.data;
+  },
+
+  getTotalRevenue: async () => {
+    const response = await api.get('/stats/revenue');
+    return response.data;
+  }
 };
 
 export const subscriptionApi = {
@@ -150,14 +159,6 @@ export const subscriptionApi = {
   }
 };
 
-interface MediaFile {
-  url: string;
-  filename: string;
-  type: 'image' | 'video' | 'document';
-  size: number;
-  created_at: string;
-}
-
 export const mediaApi = {
   upload: (type: 'image' | 'video' | 'document', formData: FormData) =>
     api.post<{ url: string }>(`/media/upload/${type}`, formData, {
@@ -171,4 +172,16 @@ export const mediaApi = {
     
   deleteFile: (type: 'image' | 'video' | 'document', filename: string) =>
     api.delete(`/media/${type}/${filename}`),
+};
+
+// Add to existing api object
+export const stripeApi = {
+  getAllPrices: async () => {
+    const response = await api.get<StripePrice[]>('/stripe/prices');
+    return response.data;
+  },
+  getPriceDetails: async (priceId: string) => {
+    const response = await api.get<StripePrice>(`/stripe/price/${priceId}`);
+    return response.data;
+  }
 };

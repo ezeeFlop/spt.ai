@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { X } from 'lucide-react';
-import { Tier, Product } from '../types';
+import { Tier, Product, StripePrice } from '../types';
+import { stripeApi } from '../services/api';
+import { formatCurrency } from '../utils/currency';
 
 interface TierModalProps {
   isOpen: boolean;
@@ -35,6 +37,8 @@ const TierModal: React.FC<TierModalProps> = ({
     }
   );
   const [showPopularWarning, setShowPopularWarning] = React.useState(false);
+  const [stripePrices, setStripePrices] = useState<StripePrice[]>([]);
+  const [isLoadingPrices, setIsLoadingPrices] = useState(false);
 
   React.useEffect(() => {
     if (tier) {
@@ -44,6 +48,23 @@ const TierModal: React.FC<TierModalProps> = ({
       });
     }
   }, [tier]);
+
+  useEffect(() => {
+    const fetchStripePrices = async () => {
+      if (formData.is_free) return;
+      setIsLoadingPrices(true);
+      try {
+        const prices = await stripeApi.getAllPrices();
+        setStripePrices(prices);
+      } catch (error) {
+        console.error('Error fetching Stripe prices:', error);
+      } finally {
+        setIsLoadingPrices(false);
+      }
+    };
+
+    fetchStripePrices();
+  }, [formData.is_free]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +96,27 @@ const TierModal: React.FC<TierModalProps> = ({
       setShowPopularWarning(true);
     }
     setFormData({ ...formData, popular: checked });
+  };
+
+  const handleStripePriceIdChange = async (priceId: string) => {
+    setFormData(prev => ({ ...prev, stripe_price_id: priceId }));
+    
+    if (!priceId || formData.is_free) return;
+
+    try {
+      const priceDetails = await stripeApi.getPriceDetails(priceId);
+      setFormData(prev => ({
+        ...prev,
+        price: priceDetails.amount,
+        billing_period: priceDetails.type === 'one_time' ? 'one_time' : (priceDetails.billing_period || prev.billing_period),
+        type: priceDetails.type,
+        currency: priceDetails.currency,
+        name: prev.name || priceDetails.product_name || '',
+        description: prev.description || priceDetails.product_description || '',
+      }));
+    } catch (error) {
+      console.error('Error fetching Stripe price details:', error);
+    }
   };
 
   if (!isOpen) return null;
@@ -174,6 +216,8 @@ const TierModal: React.FC<TierModalProps> = ({
             >
               {formData.is_free ? (
                 <option value="free">Free</option>
+              ) : formData.type === 'one_time' ? (
+                <option value="one_time">One Time</option>
               ) : (
                 <>
                   <option value="monthly">Monthly</option>
@@ -199,14 +243,25 @@ const TierModal: React.FC<TierModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {intl.formatMessage({ id: 'admin.tiers.stripePriceId' })}
             </label>
-            <input
-              type="text"
+            <select
               value={formData.stripe_price_id || ''}
-              onChange={(e) => setFormData({ ...formData, stripe_price_id: e.target.value })}
+              onChange={(e) => handleStripePriceIdChange(e.target.value)}
               className="w-full border border-gray-300 rounded-md px-3 py-2 disabled:bg-gray-100"
               required={!formData.is_free}
-              disabled={formData.is_free}
-            />
+              disabled={formData.is_free || isLoadingPrices}
+            >
+              <option value="">Select a price</option>
+              {stripePrices.map((price) => (
+                <option key={price.id} value={price.id}>
+                  {price.product_name} - {formatCurrency(price.amount, price.currency)} / {price.billing_period || 'one time'}
+                </option>
+              ))}
+            </select>
+            {isLoadingPrices && (
+              <div className="mt-1 text-sm text-gray-500">
+                Loading prices...
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

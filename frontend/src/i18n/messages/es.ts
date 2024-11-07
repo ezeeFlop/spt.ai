@@ -13,7 +13,7 @@ export default {
   'home.cta.getStarted': 'Comenzar',
   'home.cta.learnMore': 'Más información',
   
-  'features.title': 'Aplicaciones Disponibles',
+  'features.title': 'Características y Herramientas de IA',
   'features.section.technology': 'Tecnología Avanzada',
   'features.section.subtitle': 'Todo lo que necesitas para acelerar tu desarrollo de IA',
   'features.models': 'Modelos de última generación',
@@ -121,11 +121,6 @@ export default {
   
   'navigation.dashboard': 'Panel de control',
   
-  'products.neural-text-analyzer.name': 'Analizador Neural de Texto',
-  'products.quantum-image-processor.name': 'Procesador Cuántico de Imágenes',
-  'products.deep-learning-studio.name': 'Estudio de Aprendizaje Profundo',
-  'products.ai-code-assistant.name': 'Asistente de Código IA',
-  
   'admin.products.title': 'Gestionar Productos',
   'admin.products.create': 'Crear Producto',
   'admin.products.name': 'Nombre',
@@ -215,5 +210,26 @@ export default {
   'tier.none': 'Sin nivel',
   'tier.tokensRemaining': '{remaining} de {total} tokens restantes',
   'pricing.currentPlan': 'Plan Actual',
-  'pricing.confirmChange': '¿Cambiar de plan cancelará tu suscripción actual. ¿Deseas continuar?'
+  'pricing.confirmChange': '¿Cambiar de plan cancelará tu suscripción actual. ¿Deseas continuar?',
+  'product.getAccess': 'Obtener Acceso',
+  'product.launch': 'Iniciar',
+  'product.try': 'Probar Ahora',
+  'product.configure': 'Configurar',
+  'product.settings': 'Ajustes',
+  'product.documentation': 'Documentación',
+  'product.status.active': 'Activo',
+  'product.status.inactive': 'Inactivo',
+  'product.status.maintenance': 'Mantenimiento',
+  'product.error.launch': 'Error al iniciar el producto',
+  'product.error.access': 'Error al obtener acceso',
+  'product.success.launch': 'Producto iniciado exitosamente',
+  'product.success.configure': 'Configuración guardada',
+  'features.error': 'Error al cargar las características',
+  'features.payment.success': '¡Pago exitoso! Ahora tienes acceso a las características seleccionadas.',
+  'features.loading': 'Cargando características...',
+  'features.empty': 'No hay características disponibles',
+  'features.access.granted': 'Acceso concedido',
+  'features.access.denied': 'Acceso denegado',
+  'features.tryNow': 'Probar ahora',
+  'features.learnMore': 'Más información'
 }; 

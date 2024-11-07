@@ -39,30 +39,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <div 
       onClick={handleClick}
-      className="group cursor-pointer relative"
+      className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 ease-out"
     >
-      <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200">
+      <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-t-lg bg-gray-200">
         <img
           src={imageUrl}
           alt={name}
-          className="h-full w-full object-cover object-center group-hover:opacity-75"
+          className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
           {hasAccess ? (
             <div className="flex items-center space-x-2 text-white">
               <Check className="h-6 w-6" />
-              <span>{intl.formatMessage({ id: 'products.launch' })}</span>
+              <span>{intl.formatMessage({ id: 'product.launch' })}</span>
             </div>
           ) : (
             <div className="flex items-center space-x-2 text-white">
               <Lock className="h-6 w-6" />
-              <span>{intl.formatMessage({ id: 'products.getAccess' })}</span>
+              <span>{intl.formatMessage({ id: 'product.getAccess' })}</span>
             </div>
           )}
         </div>
       </div>
-      <h3 className="mt-4 text-sm text-gray-700">{name}</h3>
-      <p className="mt-1 text-lg font-medium text-gray-900">{description}</p>
+      <div className="p-4">
+        <h3 className="text-sm font-medium text-gray-700">{name}</h3>
+        <p className="mt-1 text-lg text-gray-900">{description}</p>
+      </div>
     </div>
   );
 };

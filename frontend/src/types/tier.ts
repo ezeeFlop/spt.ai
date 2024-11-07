@@ -9,6 +9,8 @@ export interface TierBase {
   stripe_price_id: string | null;
   popular?: boolean;
   is_free: boolean;
+  type?: 'recurring' | 'one_time';
+  currency?: string;
 }
 
 export interface Tier extends TierBase {

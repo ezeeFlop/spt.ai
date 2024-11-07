@@ -1,9 +1,11 @@
 from pydantic import BaseModel, validator
 from typing import Optional, List
 from .product import Product
-import logging
+from enum import Enum
 
-logger = logging.getLogger(__name__)
+class TierType(str, Enum):
+    RECURRING = "recurring"
+    ONE_TIME = "one_time"
 
 class TierBase(BaseModel):
     name: str
@@ -14,6 +16,8 @@ class TierBase(BaseModel):
     popular: bool = False
     is_free: bool = False
     stripe_price_id: Optional[str] = None
+    type: TierType = TierType.RECURRING
+    currency: str = "USD"
 
     @validator('is_free')
     def validate_is_free(cls, v, values):
@@ -52,6 +56,8 @@ class TierUpdate(BaseModel):
     popular: Optional[bool] = None
     product_ids: Optional[List[int]] = None
     is_free: Optional[bool] = False
+    type: Optional[TierType] = None
+    currency: Optional[str] = None
 
 class Tier(TierBase):
     id: int
@@ -76,6 +82,8 @@ class TierInUser(BaseModel):
     stripe_price_id: Optional[str] = None
     popular: bool = False
     is_free: bool = False
+    type: TierType = TierType.RECURRING
+    currency: str = "USD"
 
     class Config:
         from_attributes = True

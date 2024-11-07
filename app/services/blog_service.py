@@ -134,3 +134,10 @@ async def get_popular_tags(db: Session, limit: Optional[int] = None) -> List[str
     except Exception as e:
         logger.error(f"Error fetching popular tags: {str(e)}")
         return []
+
+async def get_menu_posts(db: Session) -> List[BlogPost]:
+    """Get all published blog posts that are marked to appear in the menu"""
+    return db.query(BlogPost).filter(
+        BlogPost.published == True,
+        BlogPost.in_menu == True
+    ).order_by(BlogPost.created_at.desc()).all()

@@ -18,6 +18,7 @@ class BlogPostBase(BaseModel):
     image_url: Optional[str] = None
     tags: List[str] = []
     published: bool = False
+    in_menu: bool = False
 
 class BlogPostCreate(BlogPostBase):
     pass
@@ -29,6 +30,7 @@ class BlogPostUpdate(BaseModel):
     image_url: Optional[str] = None
     tags: Optional[List[str]] = None
     published: Optional[bool] = None
+    in_menu: Optional[bool] = None
 
 class BlogPost(BlogPostBase):
     id: int

@@ -25,6 +25,7 @@ const BlogEditor: React.FC = () => {
           image_url: response.data.image_url,
           tags: response.data.tags,
           published: response.data.published,
+          in_menu: response.data.in_menu,
         });
       } catch (error) {
         console.error('Error fetching post:', error);

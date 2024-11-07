@@ -64,6 +64,8 @@ const Pricing = () => {
               popular={tier.popular}
               tokens={tier.tokens}
               billing_period={tier.billing_period}
+              currency={tier.currency}
+              type={tier.type}
               features={tier.products.map(product => ({
                 textId: product.name,
                 values: {

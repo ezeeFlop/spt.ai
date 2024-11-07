@@ -1,5 +1,6 @@
 import { ArrowRight, Brain, Sparkles, Zap } from 'lucide-react';
 import { useIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   const intl = useIntl();
@@ -8,10 +9,10 @@ const Home = () => {
     <div className="bg-white">
       <div className="relative isolate">
         {/* Hero section */}
-        <div className="relative">
+        <div className="relative z-10">
           <div className="absolute inset-0 bg-gradient-radial from-primary-100 to-transparent opacity-40" />
           <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto max-w-2xl text-center relative">
               <div className="flex justify-center mb-8">
                 <Brain className="h-16 w-16 text-primary-600" />
               </div>
@@ -24,16 +25,19 @@ const Home = () => {
               <p className="mt-6 text-lg leading-8 text-gray-600">
                 {intl.formatMessage({ id: 'home.hero.subtitle' })}
               </p>
-              <div className="mt-10 flex items-center justify-center gap-x-6">
-                <a
-                  href="/features"
+              <div className="mt-10 flex items-center justify-center gap-x-6 relative z-20">
+                <Link
+                  to="/pricing"
                   className="rounded-md bg-primary-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
                 >
                   {intl.formatMessage({ id: 'home.cta.getStarted' })}
-                </a>
-                <a href="/features" className="text-sm font-semibold leading-6 text-gray-900">
+                </Link>
+                <Link
+                  to="/features"
+                  className="text-sm font-semibold leading-6 text-gray-900"
+                >
                   {intl.formatMessage({ id: 'home.cta.learnMore' })} <ArrowRight className="inline-block ml-1 h-4 w-4" />
-                </a>
+                </Link>
               </div>
             </div>
           </div>

@@ -40,6 +40,14 @@ async def list_blog_posts(
         limit=limit
     )
 
+@router.get("/menu", response_model=List[BlogPost])
+async def get_menu_posts(db: Session = Depends(get_db)):
+    """Get all published blog posts that are marked to appear in the menu"""
+    logger.info("Getting menu posts")
+    posts = await blog_service.get_menu_posts(db)
+    logger.info(f"Found {len(posts)} menu posts")
+    return posts
+
 @router.get("/tags", response_model=List[str])
 async def get_popular_tags(
     limit: Optional[int] = Query(None, ge=1, le=50, description="Maximum number of tags to return"),
@@ -84,3 +92,4 @@ async def delete_blog_post(post_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Blog post not found")
     await blog_service.delete_blog_post(db, db_post)
     return {"status": "success"}
+

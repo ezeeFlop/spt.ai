@@ -25,6 +25,7 @@ class BlogPost(Base):
     tags: Mapped[list[str]] = Column(ARRAY(String), default=[])
     author_id: Mapped[int] = Column(Integer, ForeignKey("users.id"))
     published: Mapped[bool] = Column(Boolean, default=False)
+    in_menu: Mapped[bool] = Column(Boolean, default=False)
     
     # Relationship with User
     author = relationship("User", back_populates="blog_posts")
@@ -42,5 +43,6 @@ class BlogPost(Base):
             "image_url": self.image_url,
             "tags": self.tags,
             "author_id": self.author_id,
-            "published": self.published
+            "published": self.published,
+            "in_menu": self.in_menu
         }

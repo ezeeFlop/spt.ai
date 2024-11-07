@@ -50,3 +50,36 @@
 .markdown-body img {
   @apply rounded-lg shadow-lg my-8 max-w-full;
 }
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.5s ease-out;
+}
+
+@keyframes card-hover {
+  from {
+    transform: translateY(0) scale(1);
+    border-radius: 0.5rem;
+  }
+  to {
+    transform: translateY(-8px) scale(1.02);
+    border-radius: 1rem;
+  }
+}
+
+.card-hover-animation {
+  animation: card-hover 0.3s ease-out forwards;
+}
+
+.card-hover-animation-reverse {
+  animation: card-hover 0.3s ease-out reverse;
+}

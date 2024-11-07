@@ -28,6 +28,7 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
   const [imageUrl, setImageUrl] = React.useState(initialData?.image_url || '');
   const [tags, setTags] = React.useState<string[]>(initialData?.tags || []);
   const [published, setPublished] = React.useState(initialData?.published || false);
+  const [inMenu, setInMenu] = React.useState(initialData?.in_menu || false);
   const [submitting, setSubmitting] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +49,7 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
         image_url: imageUrl,
         tags,
         published,
+        in_menu: inMenu,
       };
 
       await onSubmit(postData);
@@ -127,17 +129,32 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
         />
       </div>
 
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="published"
-          checked={published}
-          onChange={(e) => setPublished(e.target.checked)}
-          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-        />
-        <label htmlFor="published" className="ml-2 block text-sm text-gray-900">
-          {intl.formatMessage({ id: 'admin.blog.form.published' })}
-        </label>
+      <div className="flex items-center space-x-4">
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="published"
+            checked={published}
+            onChange={(e) => setPublished(e.target.checked)}
+            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          />
+          <label htmlFor="published" className="ml-2 block text-sm text-gray-900">
+            {intl.formatMessage({ id: 'admin.blog.form.published' })}
+          </label>
+        </div>
+
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="in_menu"
+            checked={inMenu}
+            onChange={(e) => setInMenu(e.target.checked)}
+            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          />
+          <label htmlFor="in_menu" className="ml-2 block text-sm text-gray-900">
+            Show in Menu
+          </label>
+        </div>
       </div>
 
       <div className="flex justify-end">

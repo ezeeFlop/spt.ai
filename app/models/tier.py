@@ -2,6 +2,11 @@ from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 from app.models.relationships import tier_product_association, tier_subscribers
+from enum import Enum
+
+class TierType(str, Enum):
+    RECURRING = "recurring"
+    ONE_TIME = "one_time"
 
 class Tier(Base):
     __tablename__ = 'tiers'
@@ -15,6 +20,8 @@ class Tier(Base):
     stripe_price_id = Column(String, nullable=True)
     popular = Column(Boolean, default=False)
     is_free = Column(Boolean, default=False)
+    type = Column(String, default=TierType.RECURRING)
+    currency = Column(String, default="USD")
     
     # Relationships
     subscribers = relationship(
@@ -38,5 +45,7 @@ class Tier(Base):
             "stripe_price_id": self.stripe_price_id,
             "popular": self.popular,
             "is_free": self.is_free,
+            "type": self.type,
+            "currency": self.currency,
             "products": [product.to_dict() for product in self.products]
         }

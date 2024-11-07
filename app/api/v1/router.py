@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import users, products, payments, auth, blog, tiers, stats, media
+from .endpoints import users, products, payments, auth, blog, tiers, stats, media, stripe
 
 api_router = APIRouter()
 api_router.include_router(users.router, prefix="/users", tags=["users"])
@@ -10,3 +10,4 @@ api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(blog.router, prefix="/blog", tags=["blog"])
 api_router.include_router(stats.router, prefix="/stats", tags=["stats"])
 api_router.include_router(media.router, prefix="/media", tags=["media"])
+api_router.include_router(stripe.router, prefix="/stripe", tags=["stripe"])

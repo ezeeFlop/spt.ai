@@ -20,12 +20,13 @@ class PaymentCreate(BaseModel):
     tier_id: int
     payment_method_id: Optional[str] = None
     amount: float
-    currency: str = "usd"
+    currency: str = "USD"
 
 class Payment(PaymentCreate):
     id: str
     user_id: str
     status: str
+    currency: str
     created_at: datetime
     updated_at: datetime
 

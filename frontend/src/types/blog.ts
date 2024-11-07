@@ -18,6 +18,7 @@ export interface BlogPost {
   tags: string[];
   author: BlogAuthor;
   published: boolean;
+  in_menu: boolean;
 }
 
 export interface BlogPostCreate {
@@ -27,6 +28,7 @@ export interface BlogPostCreate {
   image_url?: string;
   tags: string[];
   published?: boolean;
+  in_menu?: boolean;
 }
 
 export interface BlogPostUpdate extends Partial<BlogPostCreate> {}

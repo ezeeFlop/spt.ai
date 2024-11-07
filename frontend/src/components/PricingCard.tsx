@@ -7,6 +7,7 @@ import { paymentApi } from '../services/api';
 import { toast } from 'react-toastify';
 import { useSubscription } from '../context/SubscriptionContext';
 import { SignInButton } from '@clerk/clerk-react';
+import { formatCurrency } from '../utils/currency';
 
 interface PricingFeature {
   textId: string;
@@ -23,6 +24,8 @@ interface PricingTierProps {
   popular?: boolean;
   tokens: number;
   billing_period: string;
+  currency: string;
+  type: string;
 }
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -35,7 +38,9 @@ const PricingCard: React.FC<PricingTierProps> = ({
   stripePriceId, 
   popular,
   tokens,
-  billing_period
+  billing_period,
+  currency,
+  type
 }) => {
   const { isSignedIn } = useUser();
   const intl = useIntl();
@@ -65,7 +70,10 @@ const PricingCard: React.FC<PricingTierProps> = ({
       const stripe = await stripePromise;
       if (!stripe) throw new Error('Stripe failed to load');
 
-      const { url } = await paymentApi.createCheckoutSession(parseInt(tierId));
+      const { url } = await paymentApi.createCheckoutSession(
+        parseInt(tierId), 
+        `${window.location.origin}/features?payment=success`
+      );
       window.location.href = url;
     } catch (error) {
       console.error('Payment error:', error);
@@ -131,11 +139,18 @@ const PricingCard: React.FC<PricingTierProps> = ({
         {/* Price Display */}
         <div className="flex items-center justify-center gap-1">
           <span className="text-5xl font-bold tracking-tight text-gray-900">
-            {price === 0 ? '' : '$'}{price}
+            {price === 0 ? '' : formatCurrency(price, currency)}
           </span>
-          <span className="text-lg text-gray-500 ml-2">
-            /{intl.formatMessage({ id: `pricing.period.${billing_period}` })}
-          </span>
+          {type === 'recurring' && (
+            <span className="text-lg text-gray-500 ml-2">
+              /{intl.formatMessage({ id: `pricing.period.${billing_period}` })}
+            </span>
+          )}
+          {type === 'one_time' && (
+            <span className="text-lg text-gray-500 ml-2">
+              {intl.formatMessage({ id: 'pricing.period.one_time' })}
+            </span>
+          )}
         </div>
       </div>
 

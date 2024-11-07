@@ -111,3 +111,7 @@ Output Requirements:
   
   Refer to FastAPI documentation for Data Models, Path Operations, and Middleware for best practices.
   
+  WARNING : 
+  - Do not alter any existing features
+  - think twice before answering : never alter the current projet hierarchy
+  - make sure to generate only the necessay code, avoid any duplication

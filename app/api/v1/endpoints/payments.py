@@ -113,8 +113,9 @@ async def stripe_webhook(
             tier_id = session.metadata.get('tier_id')
             payment_id = session.payment_intent or session.subscription
             amount = session.amount_total
+            currency = session.currency.upper()
             
-            logger.info(f"Processing payment for user: {user_id}, tier: {tier_id}, payment_id: {payment_id}, amount: {amount}")
+            logger.info(f"Processing payment for user: {user_id}, tier: {tier_id}, payment_id: {payment_id}, amount: {amount}, currency: {currency}")
             
             # Process the successful payment
             await payment_service.handle_successful_payment(
@@ -122,7 +123,8 @@ async def stripe_webhook(
                 clerk_id=user_id,
                 tier_id=int(tier_id),
                 payment_id=payment_id,
-                amount=amount
+                amount=amount,
+                currency=currency
             )
             
         return {"status": "success"}

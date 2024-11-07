@@ -18,6 +18,7 @@ class Payment(Base):
     tier_id = Column(Integer, ForeignKey('tiers.id'), nullable=False)
     stripe_payment_id = Column(String, unique=True)
     amount = Column(Integer, nullable=False)
+    currency = Column(String, nullable=False, default="USD")
     status = Column(SQLEnum(PaymentStatus), default=PaymentStatus.PENDING)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -34,6 +35,7 @@ class Payment(Base):
             "tier_id": self.tier_id,
             "stripe_payment_id": self.stripe_payment_id,
             "amount": self.amount,
+            "currency": self.currency,
             "status": self.status,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
