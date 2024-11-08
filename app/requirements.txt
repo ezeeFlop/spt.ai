@@ -20,3 +20,5 @@ colorama
 aiofiles
 python-multipart
 celery[redis]
+openai
+aiohttp

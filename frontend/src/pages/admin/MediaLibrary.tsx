@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/Tabs';
+import { Tabs, TabsList, TabsTrigger } from '../../components/Tabs';
 import MediaUploader from '../../components/admin/MediaUploader';
 import { mediaApi } from '../../services/api';
-import { Copy, Check, FileVideo, FileText, AlertCircle, FolderOpen, Image, Trash2 } from 'lucide-react';
+import { Copy, Check, FileVideo, FileText, AlertCircle, FolderOpen, Trash2 } from 'lucide-react';
 import ErrorBoundary from '../../components/ErrorBoundary';
 
 const MediaLibrary: React.FC = () => {
@@ -30,7 +30,7 @@ const MediaLibrary: React.FC = () => {
     fetchFiles();
   }, [activeTab]);
 
-  const handleUploadComplete = (url: string) => {
+  const handleUploadComplete = () => {
     fetchFiles();
   };
 

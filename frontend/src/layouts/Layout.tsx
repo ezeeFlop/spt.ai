@@ -6,10 +6,11 @@ import { useProducts } from '../context/ProductContext';
 import { authApi } from '../services/api';
 import { useIntl } from 'react-intl';
 import { useUserRole } from '../hooks/useUserRole';
-import LanguageSelector from './LanguageSelector';
-import { Product } from '../types/index';
-import { useMenuPosts } from '../hooks/useMenuPosts';
-import { BlogMenuItems } from './BlogMenuItems';
+import LanguageSelector from '../components/LanguageSelector';
+import { Product } from '../types/product';
+import { BlogMenuItems } from '../components/BlogMenuItems';
+import Footer from '../components/Footer';
+import CookieConsent from '../components/CookieConsent';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isSignedIn, userId } = useAuth();
@@ -17,7 +18,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { products, loading } = useProducts();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const intl = useIntl();
-  const { menuPosts, loading: menuPostsLoading } = useMenuPosts();
 
   const getProductCategory = (product: Product) => {
     if (product.category) {
@@ -65,7 +65,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }, [isSignedIn, userId, intl.locale]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <nav className="bg-white shadow-sm border-b border-gray-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center">
@@ -235,7 +235,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         )}
       </nav>
 
-      <main>{children}</main>
+      <main className="flex-grow">{children}</main>
+      <Footer />
+      <CookieConsent />
     </div>
   );
 };

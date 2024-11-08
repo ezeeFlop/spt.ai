@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useUser } from '@clerk/clerk-react';
 import { productApi, userApi } from '../services/api';
-import type { Product } from '../types';
+import type { Product } from '../types/product';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Play, Lock } from 'lucide-react';
@@ -12,7 +12,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const intl = useIntl();
   const navigate = useNavigate();
-  const { user, isSignedIn } = useUser();
+  const { isSignedIn } = useUser();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +73,6 @@ const ProductDetail = () => {
       </div>
     );
   }
-  console.log(hasAccess);
 
   // If user has access, show the product interface
   if (hasAccess) {

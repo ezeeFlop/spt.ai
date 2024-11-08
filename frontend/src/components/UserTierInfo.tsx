@@ -37,8 +37,8 @@ const UserTierInfo: React.FC = () => {
             {intl.formatMessage({ id: 'user.account.tier' })}
           </span>
           <TierBadge 
-            tierName={tier}
-            tokensLeft={counter}
+            tierName={tier || ''}
+            tokensLeft={counter || 0}
           />
         </div>
         <div className="flex justify-between items-center">

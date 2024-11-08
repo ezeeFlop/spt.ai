@@ -1,10 +1,9 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useMenuPosts } from '../hooks/useMenuPosts';
 
 export const NavMenu: React.FC = () => {
   const { menuPosts, loading } = useMenuPosts();
-  const navigate = useNavigate();
 
   if (loading || menuPosts.length === 0) return null;
 

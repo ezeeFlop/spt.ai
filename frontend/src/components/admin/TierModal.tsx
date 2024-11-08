@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
 import { X } from 'lucide-react';
-import { Tier, Product, StripePrice } from '../types';
-import { stripeApi } from '../services/api';
-import { formatCurrency } from '../utils/currency';
+import { Tier } from '../../types/tier';
+import { Product } from '../../types/product';
+import { StripePrice } from '../../types/stripe';
+import { stripeApi } from '../../services/api';
+import { formatCurrency } from '../../utils/currency';
 
 interface TierModalProps {
   isOpen: boolean;
@@ -14,6 +16,18 @@ interface TierModalProps {
   availableProducts: Product[];
 }
 
+const initialFormState = {
+  name: '',
+  description: '',
+  price: 0,
+  billing_period: 'monthly',
+  tokens: 0,
+  stripe_price_id: '',
+  product_ids: [],
+  is_free: false,
+  popular: false,
+};
+
 const TierModal: React.FC<TierModalProps> = ({
   isOpen,
   onClose,
@@ -23,19 +37,7 @@ const TierModal: React.FC<TierModalProps> = ({
   availableProducts,
 }) => {
   const intl = useIntl();
-  const [formData, setFormData] = React.useState<Partial<Tier>>(
-    tier || {
-      name: '',
-      description: '',
-      price: 0,
-      billing_period: 'monthly',
-      tokens: 0,
-      stripe_price_id: '',
-      product_ids: [],
-      is_free: false,
-      popular: false,
-    }
-  );
+  const [formData, setFormData] = React.useState<Partial<Tier>>(initialFormState);
   const [showPopularWarning, setShowPopularWarning] = React.useState(false);
   const [stripePrices, setStripePrices] = useState<StripePrice[]>([]);
   const [isLoadingPrices, setIsLoadingPrices] = useState(false);
@@ -46,8 +48,10 @@ const TierModal: React.FC<TierModalProps> = ({
         ...tier,
         product_ids: tier.products?.map(p => p.id) || [],
       });
+    } else {
+      setFormData(initialFormState);
     }
-  }, [tier]);
+  }, [tier, isOpen]);
 
   useEffect(() => {
     const fetchStripePrices = async () => {

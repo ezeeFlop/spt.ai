@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home';
 import Features from '../pages/Features';
 import Pricing from '../pages/Pricing';
-import ProductPage from '../pages/ProductPage';
 import { BlogLayout } from '../layouts/BlogLayout';
 import { BlogIndexPage } from '../pages/blog';
 import { BlogPostPage } from '../pages/blog/[slug]';
@@ -16,6 +15,9 @@ import DashboardStats from '../pages/admin/DashboardStats';
 import ListBlogPosts from '../pages/admin/ListBlogPosts';
 import BlogEditor from '../pages/admin/BlogEditor';
 import MediaLibrary from '../pages/admin/MediaLibrary';
+import Settings from '../pages/admin/Settings';
+import Privacy from '../pages/Privacy';
+import Terms from '../pages/Terms';
 
 const AppRoutes = () => {
   return (
@@ -28,6 +30,8 @@ const AppRoutes = () => {
         <Route index element={<BlogIndexPage />} />
         <Route path=":slug" element={<BlogPostPage />} />
       </Route>
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="users" element={<ListUsers />} />
@@ -38,6 +42,7 @@ const AppRoutes = () => {
         <Route path="blog/new" element={<BlogEditor />} />
         <Route path="blog/:slug/edit" element={<BlogEditor />} />
         <Route path="media" element={<MediaLibrary />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
   );

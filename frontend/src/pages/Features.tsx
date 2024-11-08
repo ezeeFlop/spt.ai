@@ -5,7 +5,7 @@ import { useUser } from '@clerk/clerk-react';
 import { productApi, userApi } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import FAQ from '../components/FAQ';
-import type { Product } from '../types';
+import type { Product } from '../types/product';
 import { CheckCircleIcon, SparklesIcon } from '@heroicons/react/24/solid';
 
 const Features = () => {

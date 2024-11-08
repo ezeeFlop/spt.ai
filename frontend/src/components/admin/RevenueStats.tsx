@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { statsApi } from '../services/api';
-import { formatCurrency } from '../utils/currency';
-
-interface RevenueData {
-  labels: string[];
-  data: number[];
-}
 
 interface RevenueByCurrency {
   [currency: string]: {

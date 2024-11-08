@@ -38,7 +38,7 @@ export interface TierUpdate {
   price?: number;
   billing_period?: string;
   tokens?: number;
-  stripe_price_id?: string;
+  stripe_price_id?: string | null;
   popular?: boolean;
   product_ids?: number[];
   is_free?: boolean;

@@ -8,7 +8,7 @@ import { PaymentStatus, TierSubscription } from '../types/payment';
 import { UserSubscription } from '../types/subscription';
 import { StripePrice } from '../types/stripe';
 import { MediaFile } from '../types/media';
-
+import { ApiResponse, ContentResponse, HomeContent } from '../types/content';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
 
 export const api = axios.create({
@@ -19,9 +19,8 @@ export const api = axios.create({
 });
 
 // Add request interceptor to include auth token
-
 api.interceptors.request.use(async (config) => {
-  const token = await window.Clerk?.session?.getToken();
+  const token = await (window as any)?.Clerk?.session?.getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -182,6 +181,48 @@ export const stripeApi = {
   },
   getPriceDetails: async (priceId: string) => {
     const response = await api.get<StripePrice>(`/stripe/price/${priceId}`);
+    return response.data;
+  }
+};
+
+export const contentApi = {
+  getPrivacyPolicy: async (locale: string) => {
+    const response = await api.get<ContentResponse>('/content/privacy-policy', {
+      params: { locale }
+    });
+    return response.data;
+  },
+  
+  getTerms: async (locale: string) => {
+    const response = await api.get<ContentResponse>('/content/terms', {
+      params: { locale }
+    });
+    return response.data;
+  },
+  
+  updatePrivacyPolicy: async (locale: string, content: string) => {
+    const response = await api.put<null>('/content/privacy-policy', {
+      locale,
+      content
+    });
+    return response.data;
+  },
+  
+  updateTerms: async (locale: string, content: string) => {
+    const response = await api.put<null>('/content/terms', {
+      locale,
+      content
+    });
+    return response.data;
+  },
+
+  getHomeContent: async (locale: string): Promise<HomeContent> => {
+    const response = await api.get<HomeContent>(`/content/home/${locale}`);
+    return response.data;
+  },
+
+  updateHomeContent: async (locale: string, content: HomeContent): Promise<void> => {
+    const response = await api.put<void>(`/content/home/${locale}`, content);
     return response.data;
   }
 };

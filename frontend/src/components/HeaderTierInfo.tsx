@@ -46,7 +46,6 @@ export const HeaderTierInfo: React.FC = () => {
 
   // Determine the tier name using both subscription and user details
   const tierName = subscription?.tier?.name || userDetails?.tier?.name;
-
   // Only show usage info if the values are available
   const hasUsageInfo = typeof userDetails?.api_calls_count === 'number' && 
                       typeof userDetails?.api_max_calls === 'number';

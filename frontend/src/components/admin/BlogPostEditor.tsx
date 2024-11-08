@@ -1,7 +1,34 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import MDEditor from '@uiw/react-md-editor';
+import {
+  MDXEditor,
+  headingsPlugin,
+  listsPlugin,
+  quotePlugin,
+  thematicBreakPlugin,
+  markdownShortcutPlugin,
+  linkPlugin,
+  linkDialogPlugin,
+  imagePlugin,
+  tablePlugin,
+  codeBlockPlugin,
+  codeMirrorPlugin,
+  diffSourcePlugin,
+  toolbarPlugin,
+  BlockTypeSelect,
+  BoldItalicUnderlineToggles,
+  CreateLink,
+  InsertImage,
+  InsertTable,
+  InsertThematicBreak,
+  ListsToggle,
+  UndoRedo,
+  CodeToggle,
+} from '@mdxeditor/editor';
 import { BlogPostCreate, BlogPostUpdate } from '../../types/blog';
+import { mediaApi } from '../../services/api';
+import '@mdxeditor/editor/style.css';
+import { Upload } from 'lucide-react';
 
 interface BlogPostEditorProps {
   initialData?: BlogPostUpdate;
@@ -15,6 +42,18 @@ const defaultProps = {
     console.error('onSubmit prop not provided');
   },
 } as const;
+
+const imageUploadHandler = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await mediaApi.upload('image', formData);
+    return response.data.url;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+};
 
 const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
   initialData,
@@ -30,6 +69,7 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
   const [published, setPublished] = React.useState(initialData?.published || false);
   const [inMenu, setInMenu] = React.useState(initialData?.in_menu || false);
   const [submitting, setSubmitting] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +97,24 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
       console.error('Error submitting post:', error);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+
+    setIsUploading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await mediaApi.upload('image', formData);
+      setImageUrl(response.data.url);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert(intl.formatMessage({ id: 'admin.blog.error.upload.image' }));
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -94,11 +152,43 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
         <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
           {intl.formatMessage({ id: 'admin.blog.form.content' })}
         </label>
-        <MDEditor
-          value={content}
-          onChange={(value) => setContent(value || '')}
-          preview="edit"
-          height={400}
+        <MDXEditor
+          markdown={content}
+          onChange={(value) => setContent(value)}
+          plugins={[
+            headingsPlugin(),
+            listsPlugin(),
+            quotePlugin(),
+            thematicBreakPlugin(),
+            markdownShortcutPlugin(),
+            linkPlugin(),
+            linkDialogPlugin(),
+            imagePlugin({
+              imageUploadHandler,
+              imageAutocompleteSuggestions: []
+            }),
+            tablePlugin(),
+            codeBlockPlugin(),
+            codeMirrorPlugin(),
+            diffSourcePlugin(),
+            toolbarPlugin({
+              toolbarContents: () => (
+                <>
+                  <UndoRedo />
+                  <BlockTypeSelect />
+                  <BoldItalicUnderlineToggles />
+                  <CodeToggle />
+                  <CreateLink />
+                  <InsertImage />
+                  <InsertTable />
+                  <InsertThematicBreak />
+                  <ListsToggle />
+                </>
+              )
+            })
+          ]}
+          contentEditableClassName="prose dark:prose-invert max-w-none"
+          className="w-full min-h-[600px] border rounded-md p-4"
         />
       </div>
 
@@ -106,13 +196,38 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
         <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
           {intl.formatMessage({ id: 'admin.blog.form.imageUrl' })}
         </label>
-        <input
-          type="url"
-          id="imageUrl"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-        />
+        <div className="flex gap-2">
+          <input
+            type="url"
+            id="imageUrl"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            className="flex-1 mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+            placeholder="https://..."
+          />
+          <div className="relative mt-1">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              disabled={isUploading}
+            />
+            <button
+              type="button"
+              className={`px-4 py-2 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 ${
+                isUploading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={isUploading}
+            >
+              {isUploading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-800" />
+              ) : (
+                <Upload className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div>

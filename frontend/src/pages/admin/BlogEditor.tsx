@@ -43,7 +43,7 @@ const BlogEditor: React.FC = () => {
         const currentPost = await blogApi.getPostBySlug(slug);
         await blogApi.updatePost(currentPost.data.id, data);
       } else {
-        await blogApi.createPost(data);
+        await blogApi.createPost(data as BlogPostCreate);
       }
       navigate('/dashboard/blog');
     } catch (error) {

@@ -28,6 +28,9 @@ Base.metadata.create_all(bind=engine)
 # Create upload directory if it doesn't exist
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 
+# Create content directory if it doesn't exist
+os.makedirs(settings.CONTENT_DIR, exist_ok=True)
+
 # Initialize FastAPI app
 app = FastAPI(
     title=f"{settings.PROJECT_NAME} - v1",

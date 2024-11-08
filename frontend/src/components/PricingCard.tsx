@@ -35,7 +35,6 @@ const PricingCard: React.FC<PricingTierProps> = ({
   name, 
   price, 
   features, 
-  stripePriceId, 
   popular,
   tokens,
   billing_period,
@@ -62,7 +61,7 @@ const PricingCard: React.FC<PricingTierProps> = ({
       }
 
       if (tierId === 'free') {
-        const subscription = await paymentApi.registerFreeTier();
+        await paymentApi.registerFreeTier();
         window.location.href = '/dashboard';
         return;
       }
@@ -71,8 +70,7 @@ const PricingCard: React.FC<PricingTierProps> = ({
       if (!stripe) throw new Error('Stripe failed to load');
 
       const { url } = await paymentApi.createCheckoutSession(
-        parseInt(tierId), 
-        `${window.location.origin}/features?payment=success`
+        parseInt(tierId)
       );
       window.location.href = url;
     } catch (error) {

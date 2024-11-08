@@ -1,3 +1,5 @@
+import { Tier } from "./tier";
+
 export interface Product {
   id: number;
   name: string;

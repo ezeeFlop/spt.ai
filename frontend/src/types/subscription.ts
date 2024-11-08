@@ -1,3 +1,5 @@
+import { Tier } from "./tier";
+
 export interface UserSubscription {
   id: number;
   user_id: string;
@@ -7,6 +9,7 @@ export interface UserSubscription {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  tier: Tier;
 }
 
 export interface TierSubscription {

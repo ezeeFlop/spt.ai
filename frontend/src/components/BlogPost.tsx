@@ -2,12 +2,8 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { Clock, Calendar, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github-dark.css';
+import { codeBlockPlugin, codeMirrorPlugin, headingsPlugin, imagePlugin, linkPlugin, listsPlugin, MDXEditor, MDXEditorMethods, quotePlugin, tablePlugin } from '@mdxeditor/editor';
+import '@mdxeditor/editor/style.css';
 
 interface BlogPostProps {
   frontMatter: {
@@ -25,6 +21,7 @@ interface BlogPostProps {
 
 const BlogPost: React.FC<BlogPostProps> = ({ frontMatter, content }) => {
   const intl = useIntl();
+  const editorRef = React.useRef<MDXEditorMethods>(null);
 
   return (
     <article className="max-w-4xl mx-auto px-6 py-16">
@@ -66,54 +63,25 @@ const BlogPost: React.FC<BlogPostProps> = ({ frontMatter, content }) => {
       </header>
 
       <div className="prose prose-lg prose-primary max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
-          className="markdown-body"
-          components={{
-            // Custom components for markdown elements
-            h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mt-8 mb-4" {...props} />,
-            h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mt-8 mb-4" {...props} />,
-            h3: ({ node, ...props }) => <h3 className="text-xl font-bold mt-6 mb-3" {...props} />,
-            p: ({ node, ...props }) => <p className="my-4 leading-7" {...props} />,
-            a: ({ node, ...props }) => (
-              <a className="text-primary-600 hover:text-primary-800 underline" {...props} />
-            ),
-            ul: ({ node, ...props }) => <ul className="list-disc list-inside my-4" {...props} />,
-            ol: ({ node, ...props }) => <ol className="list-decimal list-inside my-4" {...props} />,
-            code: ({ inline, className, children, ...props }: any) => {
-              const match = /language-(\w+)/.exec(className || '');
-              return !inline && match ? (
-                <div className="relative">
-                  <div className="absolute right-2 top-2 text-xs text-gray-400">{match[1]}</div>
-                  <pre className={`${className} rounded-lg p-4 bg-gray-900 text-white overflow-x-auto`}>
-                    <code className={className} {...props}>
-                      {children}
-                    </code>
-                  </pre>
-                </div>
-              ) : (
-                <code className="bg-gray-100 rounded px-2 py-1 text-sm" {...props}>
-                  {children}
-                </code>
-              );
-            },
-            pre: ({ node, ...props }) => (
-              <pre className="bg-gray-900 rounded-lg p-4 my-4 overflow-x-auto" {...props} />
-            ),
-            blockquote: ({ node, ...props }) => (
-              <blockquote
-                className="border-l-4 border-primary-200 pl-4 my-4 italic text-gray-700"
-                {...props}
-              />
-            ),
-            img: ({ node, ...props }) => (
-              <img className="rounded-lg shadow-lg my-8" {...props} />
-            ),
-          }}
-        >
-          {content}
-        </ReactMarkdown>
+        <MDXEditor
+          ref={editorRef}
+          markdown={content}
+          readOnly
+          contentEditableClassName="prose dark:prose-invert max-w-none"
+          className="w-full border-none focus:outline-none"
+          plugins={[
+            headingsPlugin(),
+            listsPlugin(),
+            quotePlugin(),
+            linkPlugin(),
+            imagePlugin(),
+            tablePlugin(),
+            codeBlockPlugin({
+              defaultCodeBlockLanguage: 'typescript'
+            }),
+            codeMirrorPlugin(),
+          ]}
+        />
       </div>
     </article>
   );

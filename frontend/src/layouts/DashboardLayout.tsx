@@ -5,10 +5,9 @@ import LayersIcon from '@mui/icons-material/Layers';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PermMediaIcon from '@mui/icons-material/PermMedia';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { FormattedMessage } from 'react-intl';
 import { FileText } from 'lucide-react';
-import { TierBadge } from '../components/TierBadge';
-import { useSubscription } from '../context/SubscriptionContext';
 
 const DashboardLayout: React.FC = () => {
   return (
@@ -78,6 +77,17 @@ const DashboardLayout: React.FC = () => {
               <PermMediaIcon className="mr-2" />
               <span>
                 <FormattedMessage id="dashboard.menu.media" />
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/dashboard/settings"
+              className="flex items-center text-gray-700 hover:text-blue-600 transition-colors duration-200"
+            >
+              <SettingsIcon className="mr-2" />
+              <span>
+                <FormattedMessage id="dashboard.menu.settings" />
               </span>
             </Link>
           </li>

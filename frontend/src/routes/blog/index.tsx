@@ -4,11 +4,11 @@ import { formatDistance } from 'date-fns';
 import { Clock, Calendar } from 'lucide-react';
 import { useIntl } from 'react-intl';
 import { blogApi } from '../../services/api';
-import type { BlogPostResponse } from '../../types/api';
+import type { BlogPost } from '../../types/blog';
 
 const BlogIndex = () => {
   const intl = useIntl();
-  const [posts, setPosts] = React.useState<BlogPostResponse[]>([]);
+  const [posts, setPosts] = React.useState<BlogPost[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 

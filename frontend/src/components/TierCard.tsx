@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tier } from '../types/tier';
-import { useSubscription } from '../contexts/SubscriptionContext';
+import { useSubscription } from '../context/SubscriptionContext';
 import { paymentApi, subscriptionApi } from '../services/api';
 import { useIntl } from 'react-intl';
 

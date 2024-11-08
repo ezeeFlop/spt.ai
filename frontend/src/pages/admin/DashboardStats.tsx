@@ -250,7 +250,7 @@ const DashboardStats: React.FC = () => {
                   }
                 ]
               }}
-              options={chartOptions}
+              options={chartOptions as any}
             />
           </div>
         </div>
@@ -278,7 +278,7 @@ const DashboardStats: React.FC = () => {
                     }
                   ]
                 }}
-                options={chartOptions}
+                options={chartOptions as any}
               />
             </div>
           </div>

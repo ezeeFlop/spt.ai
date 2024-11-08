@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { tierApi, productApi } from '../../services/api';
-import { Tier, Product } from '../../types';
-import TierModal from '../../components/TierModal';
-import { TierResponse } from '../../types/api';
+import { Tier } from '../../types/tier';
+import { Product } from '../../types/product';
 import { formatCurrency } from '../../utils/currency';
+import TierModal from '../../components/admin/TierModal';
 
 const ListTiers: React.FC = () => {
   const [tiers, setTiers] = useState<Tier[]>([]);
@@ -100,7 +100,10 @@ const ListTiers: React.FC = () => {
           {intl.formatMessage({ id: 'admin.tiers.title' })}
         </h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setSelectedTier(undefined);
+            setIsModalOpen(true);
+          }}
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
@@ -145,18 +148,20 @@ const ListTiers: React.FC = () => {
                   {tier.products?.map(product => product.name).join(', ')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <button
-                    onClick={() => handleEdit(tier)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                  >
-                    {intl.formatMessage({ id: 'admin.tiers.edit' })}
-                  </button>
-                  <button
-                    onClick={() => handleDeleteTier(tier.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    {intl.formatMessage({ id: 'admin.tiers.delete' })}
-                  </button>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => handleEdit(tier)}
+                      className="text-indigo-600 hover:text-indigo-900"
+                    >
+                      <Edit2 className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTier(tier.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

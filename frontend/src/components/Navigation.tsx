@@ -1,10 +1,8 @@
 import { useUserRole } from '../hooks/useUserRole';
-import { useIntl } from 'react-intl';
 import { HeaderTierInfo } from './HeaderTierInfo';
 
 export const Navigation = () => {
-  const { role, isLoading } = useUserRole();
-  const intl = useIntl();
+  const { isLoading } = useUserRole();
 
   if (isLoading) {
     return null;

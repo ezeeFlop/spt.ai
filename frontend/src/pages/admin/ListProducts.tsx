@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useIntl } from 'react-intl';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye } from 'lucide-react';
 import { productApi } from '../../services/api';
-import { Product } from '../../types';
-import ProductModal from '../../components/ProductModal';
+import { Product } from '../../types/product';
+import ProductModal from '../../components/admin/ProductModal';
 
 const ListProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -81,6 +81,11 @@ const ListProducts: React.FC = () => {
     setSelectedProduct(undefined);
   };
 
+  const handleOpenCreateModal = () => {
+    setSelectedProduct(undefined);
+    setIsModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -104,7 +109,7 @@ const ListProducts: React.FC = () => {
           {intl.formatMessage({ id: 'admin.products.title' })}
         </h1>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenCreateModal}
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
@@ -153,18 +158,28 @@ const ListProducts: React.FC = () => {
                     </a>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleEdit(product)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    >
-                      {intl.formatMessage({ id: 'admin.products.edit' })}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      {intl.formatMessage({ id: 'admin.products.delete' })}
-                    </button>
+                    <div className="flex justify-end space-x-3">
+                      <a 
+                        href={product.frontend_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-600 hover:text-primary-900"
+                      >
+                        <Eye className="h-5 w-5" />
+                      </a>
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        <Edit2 className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
