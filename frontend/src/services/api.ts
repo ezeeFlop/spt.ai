@@ -224,5 +224,34 @@ export const contentApi = {
   updateHomeContent: async (locale: string, content: HomeContent): Promise<void> => {
     const response = await api.put<void>(`/content/home/${locale}`, content);
     return response.data;
+  },
+
+  generateMarkdown: async (prompt: string, locale: string) => {
+    const response = await api.post<{ content: string }>('/content/generate-markdown', {
+      prompt,
+      locale
+    });
+    return response.data;
+  },
+
+  generateImage: async (prompt: string, saveToMedia: boolean = true) => {
+    const response = await api.post<{ image_url: string, saved_path?: string, url?: string }>('/content/generate-image', {
+      prompt,
+      save_to_media: saveToMedia
+    });
+    return response.data;
+  },
+
+  translateContent: async (
+    contentType: string,
+    sourceLocale: string,
+    targetLocale: string,
+    force: boolean = false
+  ) => {
+    const response = await api.post<{ status: string, translated_content: any }>(
+      `/content/translate/${contentType}/${sourceLocale}/${targetLocale}`,
+      { force }
+    );
+    return response.data;
   }
 };

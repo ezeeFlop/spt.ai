@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { Lock, Check } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ProductCardProps {
   id: string;
@@ -36,6 +38,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
+  const truncatedDescription = description.length > 100 
+    ? description.substring(0, 100) + '...'
+    : description;
+
   return (
     <div 
       onClick={handleClick}
@@ -63,7 +69,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </div>
       <div className="p-4">
         <h3 className="text-sm font-medium text-gray-700">{name}</h3>
-        <p className="mt-1 text-lg text-gray-900">{description}</p>
+        <div className="mt-1 text-lg text-gray-900 prose prose-sm">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {truncatedDescription}
+          </ReactMarkdown>
+        </div>
       </div>
     </div>
   );

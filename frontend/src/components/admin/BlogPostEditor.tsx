@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useIntl } from 'react-intl';
 import {
   MDXEditor,
@@ -24,11 +24,13 @@ import {
   ListsToggle,
   UndoRedo,
   CodeToggle,
+  MDXEditorMethods,
 } from '@mdxeditor/editor';
 import { BlogPostCreate, BlogPostUpdate } from '../../types/blog';
 import { mediaApi } from '../../services/api';
 import '@mdxeditor/editor/style.css';
-import { Upload } from 'lucide-react';
+import { Upload, ImageOff } from 'lucide-react';
+import { AIContentGenerator } from '../AIContentGenerator';
 
 interface BlogPostEditorProps {
   initialData?: BlogPostUpdate;
@@ -55,12 +57,50 @@ const imageUploadHandler = async (file: File) => {
   }
 };
 
+const ImagePreview: React.FC<{ url: string }> = ({ url }) => {
+  const [error, setError] = React.useState(false);
+
+  if (!url) {
+    return (
+      <div className="flex items-center justify-center aspect-square max-h-64 bg-gray-100 rounded-md">
+        <div className="text-gray-400 flex flex-col items-center">
+          <ImageOff className="h-8 w-8 mb-2" />
+          <span className="text-sm">No image selected</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center aspect-square max-h-64 bg-gray-100 rounded-md">
+        <div className="text-red-400 flex flex-col items-center">
+          <ImageOff className="h-8 w-8 mb-2" />
+          <span className="text-sm">Failed to load image</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="aspect-square max-h-64 overflow-hidden rounded-md">
+      <img
+        src={url}
+        alt="Blog post preview"
+        onError={() => setError(true)}
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
+};
+
 const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
   initialData,
   onSubmit = defaultProps.onSubmit,
   isEditing = defaultProps.isEditing,
 }) => {
   const intl = useIntl();
+  const editorRef = useRef<MDXEditorMethods>(null);
   const [title, setTitle] = React.useState(initialData?.title || '');
   const [content, setContent] = React.useState(initialData?.content || '');
   const [description, setDescription] = React.useState(initialData?.description || '');
@@ -118,8 +158,22 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
     }
   };
 
+  const handleGeneratedContent = (generatedContent: string) => {
+    setContent((prevContent) => {
+      const newContent = prevContent + '\n\n' + generatedContent;
+      if (editorRef.current) {
+        editorRef.current.setMarkdown(newContent);
+      }
+      return newContent;
+    });
+  };
+
+  const handleGeneratedImage = (imageUrl: string) => {
+    setImageUrl(imageUrl);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl mx-auto">
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700">
           {intl.formatMessage({ id: 'admin.blog.form.title' })}
@@ -152,80 +206,117 @@ const BlogPostEditor: React.FC<BlogPostEditorProps> = ({
         <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
           {intl.formatMessage({ id: 'admin.blog.form.content' })}
         </label>
-        <MDXEditor
-          markdown={content}
-          onChange={(value) => setContent(value)}
-          plugins={[
-            headingsPlugin(),
-            listsPlugin(),
-            quotePlugin(),
-            thematicBreakPlugin(),
-            markdownShortcutPlugin(),
-            linkPlugin(),
-            linkDialogPlugin(),
-            imagePlugin({
-              imageUploadHandler,
-              imageAutocompleteSuggestions: []
-            }),
-            tablePlugin(),
-            codeBlockPlugin(),
-            codeMirrorPlugin(),
-            diffSourcePlugin(),
-            toolbarPlugin({
-              toolbarContents: () => (
-                <>
-                  <UndoRedo />
-                  <BlockTypeSelect />
-                  <BoldItalicUnderlineToggles />
-                  <CodeToggle />
-                  <CreateLink />
-                  <InsertImage />
-                  <InsertTable />
-                  <InsertThematicBreak />
-                  <ListsToggle />
-                </>
-              )
-            })
-          ]}
-          contentEditableClassName="prose dark:prose-invert max-w-none"
-          className="w-full min-h-[600px] border rounded-md p-4"
-        />
+        <div className="space-y-4">
+          <MDXEditor
+            ref={editorRef}
+            markdown={content}
+            onChange={(value) => setContent(value)}
+            plugins={[
+              headingsPlugin(),
+              listsPlugin(),
+              quotePlugin(),
+              thematicBreakPlugin(),
+              markdownShortcutPlugin(),
+              linkPlugin(),
+              linkDialogPlugin(),
+              imagePlugin({
+                imageUploadHandler,
+                imageAutocompleteSuggestions: []
+              }),
+              tablePlugin(),
+              codeBlockPlugin(),
+              codeMirrorPlugin(),
+              diffSourcePlugin(),
+              toolbarPlugin({
+                toolbarContents: () => (
+                  <>
+                    <UndoRedo />
+                    <BlockTypeSelect />
+                    <BoldItalicUnderlineToggles />
+                    <CodeToggle />
+                    <CreateLink />
+                    <InsertImage />
+                    <InsertTable />
+                    <InsertThematicBreak />
+                    <ListsToggle />
+                  </>
+                )
+              })
+            ]}
+            contentEditableClassName="prose dark:prose-invert max-w-none"
+            className="w-full min-h-[600px] border rounded-md p-4"
+          />
+          
+          <div className="bg-gray-50 p-4 rounded-md border">
+            <h3 className="text-sm font-medium text-gray-900 mb-2">
+              {intl.formatMessage({ id: 'ai.content.generate' })}
+            </h3>
+            <AIContentGenerator
+              type="markdown"
+              onGenerated={handleGeneratedContent}
+              placeholder={intl.formatMessage({ id: 'ai.content.placeholder' })}
+              locale={intl.locale}
+              className="mt-2"
+            />
+          </div>
+        </div>
       </div>
 
       <div>
         <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">
           {intl.formatMessage({ id: 'admin.blog.form.imageUrl' })}
         </label>
-        <div className="flex gap-2">
-          <input
-            type="url"
-            id="imageUrl"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-            className="flex-1 mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-            placeholder="https://..."
-          />
-          <div className="relative mt-1">
+        <div className="space-y-4">
+          <div className="flex gap-2">
             <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              disabled={isUploading}
+              type="url"
+              id="imageUrl"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="flex-1 mt-1 block rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+              placeholder="https://..."
             />
-            <button
-              type="button"
-              className={`px-4 py-2 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 ${
-                isUploading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-              disabled={isUploading}
-            >
-              {isUploading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-800" />
-              ) : (
-                <Upload className="h-5 w-5" />
-              )}
-            </button>
+            <div className="relative mt-1">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={isUploading}
+              />
+              <button
+                type="button"
+                className={`px-4 py-2 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 ${
+                  isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-800" />
+                ) : (
+                  <Upload className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
+          
+          <div className="bg-white border rounded-md p-4">
+            <h4 className="text-sm font-medium text-gray-900 mb-2">
+              {intl.formatMessage({ id: 'admin.blog.form.imagePreview' })}
+            </h4>
+            <ImagePreview url={imageUrl} />
+          </div>
+          
+          <div className="bg-gray-50 p-4 rounded-md border">
+            <h3 className="text-sm font-medium text-gray-900 mb-2">
+              {intl.formatMessage({ id: 'ai.image.generate' })}
+            </h3>
+            <AIContentGenerator
+              type="image"
+              onGenerated={handleGeneratedImage}
+              placeholder={intl.formatMessage({ id: 'ai.image.placeholder' })}
+              className="mt-2"
+            />
           </div>
         </div>
       </div>

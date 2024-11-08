@@ -34,6 +34,9 @@ import {
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
 import debounce from 'lodash/debounce';
+import { AIContentGenerator } from '../../components/AIContentGenerator';
+import { AIGenerationPlugin } from '../../components/editor/AIGenerationPlugin';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/Dialog';
 
 const SUPPORTED_LOCALES = ['en', 'fr', 'de', 'es'];
 const SUPPORTED_ICONS = ['Brain', 'Sparkles', 'Zap'];
@@ -100,15 +103,55 @@ const mdxEditorPlugins = [
   })
 ];
 
-const HomeContentEditor = ({ content, onChange, onSave }: { 
-  locale: string, 
-  content?: HomeContent, 
-  onChange: (content: HomeContent) => void, 
-  onSave: () => void 
+const HomeContentEditor = ({ locale, content, onChange, onSave }: {
+  locale: string,
+  content?: HomeContent,
+  onChange: (content: HomeContent) => void,
+  onSave: () => void
 }) => {
   const intl = useIntl();
   const safeContent = content ?? {...DEFAULT_HOME_CONTENT};
   const [isSaving, setIsSaving] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [currentField, setCurrentField] = useState<{
+    section: string;
+    field: string;
+    index?: number;
+  } | null>(null);
+
+  const handleGeneratedContent = (section: string, field: string, value: string, index?: number) => {
+    const newContent = { ...safeContent };
+    if (section === 'features' && typeof index === 'number') {
+      // Handle feature items
+      const newItems = [...newContent.content.features.items];
+      newItems[index] = {
+        ...newItems[index],
+        [field]: value
+      };
+      onChange({
+        ...safeContent,
+        content: {
+          ...safeContent.content,
+          features: {
+            ...safeContent.content.features,
+            items: newItems
+          }
+        }
+      });
+    } else {
+      // Handle other fields
+      onChange({
+        ...safeContent,
+        content: {
+          ...safeContent.content,
+          [section]: {
+            ...safeContent.content[section],
+            [field]: value
+          }
+        }
+      });
+    }
+  };
 
   const debouncedOnChange = useCallback(
     debounce((value: string, field: string, section: 'hero' | 'features', itemIndex?: number) => {
@@ -159,6 +202,16 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
     }
   };
 
+  const handleAIButtonClick = (section: string, field: string, index?: number) => {
+    setCurrentField({ section, field, index });
+    setIsAIModalOpen(true);
+  };
+
+  const createEditorPlugins = (section: string, field: string, index?: number) => [
+    ...mdxEditorPlugins,
+    AIGenerationPlugin(() => handleAIButtonClick(section, field, index))
+  ];
+
   return (
     <div className="space-y-6">
       <div className="bg-white shadow-sm rounded-lg p-6">
@@ -171,7 +224,7 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
             <MDXEditor
               markdown={safeContent.content.hero.title}
               onChange={(value) => debouncedOnChange(value, 'title', 'hero')}
-              plugins={mdxEditorPlugins}
+              plugins={createEditorPlugins('hero', 'title')}
               contentEditableClassName="prose dark:prose-invert max-w-none"
               className="w-full min-h-[100px] border rounded-md"
             />
@@ -183,7 +236,7 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
             <MDXEditor
               markdown={safeContent.content.hero.subtitle}
               onChange={(value) => debouncedOnChange(value, 'subtitle', 'hero')}
-              plugins={mdxEditorPlugins}
+              plugins={createEditorPlugins('hero', 'subtitle')}
               contentEditableClassName="prose dark:prose-invert max-w-none"
               className="w-full min-h-[100px] border rounded-md"
             />
@@ -195,7 +248,7 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
             <MDXEditor
               markdown={safeContent.content.hero.ctaPrimary}
               onChange={(value) => debouncedOnChange(value, 'ctaPrimary', 'hero')}
-              plugins={mdxEditorPlugins}
+              plugins={createEditorPlugins('hero', 'ctaPrimary')}
               contentEditableClassName="prose dark:prose-invert max-w-none"
               className="w-full min-h-[100px] border rounded-md"
             />
@@ -207,7 +260,7 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
             <MDXEditor
               markdown={safeContent.content.hero.ctaSecondary}
               onChange={(value) => debouncedOnChange(value, 'ctaSecondary', 'hero')}
-              plugins={mdxEditorPlugins}
+              plugins={createEditorPlugins('hero', 'ctaSecondary')}
               contentEditableClassName="prose dark:prose-invert max-w-none"
               className="w-full min-h-[100px] border rounded-md"
             />
@@ -225,7 +278,7 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
             <MDXEditor
               markdown={safeContent.content.features.title}
               onChange={(value) => debouncedOnChange(value, 'title', 'features')}
-              plugins={mdxEditorPlugins}
+              plugins={createEditorPlugins('features', 'title')}
               contentEditableClassName="prose dark:prose-invert max-w-none"
               className="w-full min-h-[100px] border rounded-md"
             />
@@ -237,7 +290,7 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
             <MDXEditor
               markdown={safeContent.content.features.subtitle}
               onChange={(value) => debouncedOnChange(value, 'subtitle', 'features')}
-              plugins={mdxEditorPlugins}
+              plugins={createEditorPlugins('features', 'subtitle')}
               contentEditableClassName="prose dark:prose-invert max-w-none"
               className="w-full min-h-[100px] border rounded-md"
             />
@@ -275,7 +328,7 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
                   <MDXEditor
                     markdown={item.title}
                     onChange={(value) => debouncedOnChange(value, 'title', 'features', index)}
-                    plugins={mdxEditorPlugins}
+                    plugins={createEditorPlugins('features', 'item', index)}
                     contentEditableClassName="prose dark:prose-invert max-w-none"
                     className="w-full min-h-[100px] border rounded-md"
                   />
@@ -287,7 +340,7 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
                   <MDXEditor
                     markdown={item.description}
                     onChange={(value) => debouncedOnChange(value, 'description', 'features', index)}
-                    plugins={mdxEditorPlugins}
+                    plugins={createEditorPlugins('features', 'item', index)}
                     contentEditableClassName="prose dark:prose-invert max-w-none"
                     className="w-full min-h-[100px] border rounded-md"
                   />
@@ -357,6 +410,56 @@ const HomeContentEditor = ({ content, onChange, onSave }: {
           )}
         </button>
       </div>
+
+      {isAIModalOpen && currentField && (
+        <Dialog open={isAIModalOpen} onOpenChange={setIsAIModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>AI Content Generator</DialogTitle>
+            </DialogHeader>
+            <AIContentGenerator
+              type={locale !== 'en' ? 'translation' : 'markdown'}
+              onGenerated={(content) => {
+                handleGeneratedContent(
+                  currentField.section,
+                  currentField.field,
+                  content,
+                  currentField.index
+                );
+                setIsAIModalOpen(false);
+              }}
+              sourceLocale={locale !== 'en' ? 'en' : undefined}
+              targetLocale={locale}
+              contentType="home"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+};
+
+const AIGeneratorWrapper = ({ 
+  onGenerated, 
+  sourceLocale, 
+  targetLocale,
+  contentType = 'home'
+}: { 
+  onGenerated: (content: string) => void;
+  sourceLocale?: string;
+  targetLocale: string;
+  contentType?: string;
+}) => {
+  return (
+    <div className="mt-4 bg-gray-50 p-4 rounded-md border mb-4">
+      <AIContentGenerator
+        type={sourceLocale ? 'translation' : 'markdown'}
+        onGenerated={onGenerated}
+        sourceLocale={sourceLocale}
+        targetLocale={targetLocale}
+        contentType={contentType}
+        className="mt-2"
+      />
     </div>
   );
 };
@@ -570,6 +673,19 @@ const Settings = () => {
                     {intl.formatMessage({ id: 'settings.save' })}
                   </button>
                 </div>
+                <AIGeneratorWrapper
+                  onGenerated={(content) => {
+                    setContents(prev => ({
+                      ...prev,
+                      terms: {
+                        ...prev.terms,
+                        [locale]: content
+                      }
+                    }));
+                  }}
+                  sourceLocale={locale !== 'en' ? 'en' : undefined}
+                  targetLocale={locale}
+                />
                 <MDXEditor
                   markdown={contents.terms[locale] || ''}
                   onChange={(value) => {
@@ -581,39 +697,7 @@ const Settings = () => {
                       }
                     }));
                   }}
-                  plugins={[
-                    headingsPlugin(),
-                    listsPlugin(),
-                    quotePlugin(),
-                    thematicBreakPlugin(),
-                    markdownShortcutPlugin(),
-                    linkPlugin(),
-                    linkDialogPlugin(),
-                    imagePlugin({
-                      imageUploadHandler,
-                      imageAutocompleteSuggestions: []
-                    }),
-                    tablePlugin(),
-                    codeBlockPlugin(),
-                    codeMirrorPlugin(),
-                    diffSourcePlugin(),
-                    frontmatterPlugin(),
-                    toolbarPlugin({
-                      toolbarContents: () => (
-                        <>
-                          <UndoRedo />
-                          <BlockTypeSelect />
-                          <BoldItalicUnderlineToggles />
-                          <CodeToggle />
-                          <CreateLink />
-                          <InsertImage />
-                          <InsertTable />
-                          <InsertThematicBreak />
-                          <ListsToggle />
-                        </>
-                      )
-                    })
-                  ]}
+                  plugins={mdxEditorPlugins}
                   contentEditableClassName="prose dark:prose-invert max-w-none"
                   className="w-full min-h-[400px] border rounded-md p-4"
                 />

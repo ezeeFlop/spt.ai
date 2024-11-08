@@ -101,9 +101,9 @@ const ProductDetail = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {/* Product Summary */}
-          <div className="relative">
+          <div className="relative max-h-[400px] overflow-hidden">
             {product.cover_image && (
-              <div className="aspect-w-16 aspect-h-9">
+              <div className="aspect-w-16 aspect-h-7">
                 <img
                   src={product.cover_image}
                   alt={product.name}
@@ -111,9 +111,11 @@ const ProductDetail = () => {
                 />
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8">
-              <h1 className="text-4xl font-bold text-white mb-4">{product.name}</h1>
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h1 className="text-4xl font-bold text-white mb-4">{product.name}</h1>
+              </div>
             </div>
           </div>
 

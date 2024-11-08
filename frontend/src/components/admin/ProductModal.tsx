@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, ImageOff } from 'lucide-react';
 import { Product } from '../../types/product';
 import {
   MDXEditor,
@@ -29,7 +29,43 @@ import {
 } from '@mdxeditor/editor';
 import { mediaApi } from '../../services/api';
 import '@mdxeditor/editor/style.css';
+import { AIContentGenerator } from '../AIContentGenerator';
+const ImagePreview: React.FC<{ url: string }> = ({ url }) => {
+  const [error, setError] = React.useState(false);
 
+  if (!url) {
+    return (
+      <div className="flex items-center justify-center aspect-square max-h-64 bg-gray-100 rounded-md">
+        <div className="text-gray-400 flex flex-col items-center">
+          <ImageOff className="h-8 w-8 mb-2" />
+          <span className="text-sm">No image selected</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center aspect-square max-h-64 bg-gray-100 rounded-md">
+        <div className="text-red-400 flex flex-col items-center">
+          <ImageOff className="h-8 w-8 mb-2" />
+          <span className="text-sm">Failed to load image</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="aspect-square max-h-64 overflow-hidden rounded-md">
+      <img
+        src={url}
+        alt="Product preview"
+        onError={() => setError(true)}
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
+};
 interface ProductModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -109,6 +145,21 @@ const ProductModal: React.FC<ProductModalProps> = ({
     }
   };
 
+  const handleGeneratedContent = (generatedContent: string) => {
+    setFormData(prev => ({
+      ...prev,
+      description: prev.description + '\n\n' + generatedContent
+    }));
+    setEditorKey(prev => prev + 1);
+  };
+
+  const handleGeneratedImage = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      cover_image: imageUrl
+    }));
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -134,51 +185,66 @@ const ProductModal: React.FC<ProductModalProps> = ({
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {intl.formatMessage({ id: 'admin.products.description' })}
-            </label>
-            <MDXEditor
-              key={editorKey}
-              markdown={formData.description || ''}
-              onChange={(value) => setFormData({ ...formData, description: value })}
-              plugins={[
-                headingsPlugin(),
-                listsPlugin(),
-                quotePlugin(),
-                thematicBreakPlugin(),
-                markdownShortcutPlugin(),
-                linkPlugin(),
-                linkDialogPlugin(),
-                imagePlugin({
-                  imageUploadHandler,
-                  imageAutocompleteSuggestions: []
-                }),
-                tablePlugin(),
-                codeBlockPlugin(),
-                codeMirrorPlugin(),
-                diffSourcePlugin(),
-                toolbarPlugin({
-                  toolbarContents: () => (
-                    <>
-                      <UndoRedo />
-                      <BlockTypeSelect />
-                      <BoldItalicUnderlineToggles />
-                      <CodeToggle />
-                      <CreateLink />
-                      <InsertImage />
-                      <InsertTable />
-                      <InsertThematicBreak />
-                      <ListsToggle />
-                    </>
-                  )
-                })
-              ]}
-              contentEditableClassName="prose dark:prose-invert max-w-none"
-              className="w-full min-h-[300px] border rounded-md p-4 [&_.mdxeditor-toolbar]:!z-[9999] [&_.mdxeditor-popup-container]:!z-[9999]"
-            />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {intl.formatMessage({ id: 'admin.products.description' })}
+              </label>
+              <MDXEditor
+                key={editorKey}
+                markdown={formData.description || ''}
+                onChange={(value) => setFormData({ ...formData, description: value })}
+                plugins={[
+                  headingsPlugin(),
+                  listsPlugin(),
+                  quotePlugin(),
+                  thematicBreakPlugin(),
+                  markdownShortcutPlugin(),
+                  linkPlugin(),
+                  linkDialogPlugin(),
+                  imagePlugin({
+                    imageUploadHandler,
+                    imageAutocompleteSuggestions: []
+                  }),
+                  tablePlugin(),
+                  codeBlockPlugin(),
+                  codeMirrorPlugin(),
+                  diffSourcePlugin(),
+                  toolbarPlugin({
+                    toolbarContents: () => (
+                      <>
+                        <UndoRedo />
+                        <BlockTypeSelect />
+                        <BoldItalicUnderlineToggles />
+                        <CodeToggle />
+                        <CreateLink />
+                        <InsertImage />
+                        <InsertTable />
+                        <InsertThematicBreak />
+                        <ListsToggle />
+                      </>
+                    )
+                  })
+                ]}
+                contentEditableClassName="prose dark:prose-invert max-w-none"
+                className="w-full min-h-[300px] border rounded-md p-4 [&_.mdxeditor-toolbar]:!z-[9999] [&_.mdxeditor-popup-container]:!z-[9999]"
+              />
+              
+              <div className="mt-4 bg-gray-50 p-4 rounded-md border">
+                <h3 className="text-sm font-medium text-gray-900 mb-2">
+                  {intl.formatMessage({ id: 'ai.content.generate' })}
+                </h3>
+                <AIContentGenerator
+                  type="markdown"
+                  onGenerated={handleGeneratedContent}
+                  placeholder={intl.formatMessage({ id: 'ai.content.placeholder' })}
+                  locale={intl.locale}
+                  className="mt-2"
+                />
+              </div>
+            </div>
           </div>
-          <div>
+          <div className="space-y-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {intl.formatMessage({ id: 'admin.products.coverImage' })}
             </label>
@@ -212,6 +278,25 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   )}
                 </button>
               </div>
+            </div>
+            
+            <div className="bg-white border rounded-md p-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">
+                {intl.formatMessage({ id: 'admin.blog.form.imagePreview' })}
+              </h4>
+              <ImagePreview url={formData.cover_image || ''} />
+            </div>
+            
+            <div className="bg-gray-50 p-4 rounded-md border">
+              <h3 className="text-sm font-medium text-gray-900 mb-2">
+                {intl.formatMessage({ id: 'ai.image.generate' })}
+              </h3>
+              <AIContentGenerator
+                type="image"
+                onGenerated={handleGeneratedImage}
+                placeholder={intl.formatMessage({ id: 'ai.image.placeholder' })}
+                className="mt-2"
+              />
             </div>
           </div>
           <div>

@@ -3,13 +3,13 @@ import { useIntl } from 'react-intl';
 import { Plus, Edit2, Trash2, Eye } from 'lucide-react';
 import { productApi } from '../../services/api';
 import { Product } from '../../types/product';
-import ProductModal from '../../components/admin/ProductModal';
+import ProductEditor from '../../components/admin/ProductEditor';
 
 const ListProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | undefined>();
   const intl = useIntl();
 
@@ -33,11 +33,12 @@ const ListProducts: React.FC = () => {
     try {
       const response = await productApi.create(productData);
       setProducts([...products, response.data]);
-      setIsModalOpen(false);
-      alert(intl.formatMessage({ id: 'admin.products.success.create' }));
+      setIsEditing(false);
+      setSelectedProduct(undefined);
+      toast.success(intl.formatMessage({ id: 'admin.products.success.create' }));
     } catch (error) {
       console.error('Error creating product:', error);
-      alert(intl.formatMessage({ id: 'admin.products.error.create' }));
+      toast.error(intl.formatMessage({ id: 'admin.products.error.create' }));
     }
   };
 
@@ -49,12 +50,12 @@ const ListProducts: React.FC = () => {
       setProducts(products.map(product => 
         product.id === selectedProduct.id ? { ...product, ...productData } : product
       ));
-      setIsModalOpen(false);
+      setIsEditing(false);
       setSelectedProduct(undefined);
-      alert(intl.formatMessage({ id: 'admin.products.success.update' }));
+      toast.success(intl.formatMessage({ id: 'admin.products.success.update' }));
     } catch (error) {
       console.error('Error updating product:', error);
-      alert(intl.formatMessage({ id: 'admin.products.error.update' }));
+      toast.error(intl.formatMessage({ id: 'admin.products.error.update' }));
     }
   };
 
@@ -73,17 +74,12 @@ const ListProducts: React.FC = () => {
 
   const handleEdit = (product: Product) => {
     setSelectedProduct(product);
-    setIsModalOpen(true);
+    setIsEditing(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleOpenCreate = () => {
     setSelectedProduct(undefined);
-  };
-
-  const handleOpenCreateModal = () => {
-    setSelectedProduct(undefined);
-    setIsModalOpen(true);
+    setIsEditing(true);
   };
 
   if (isLoading) {
@@ -102,6 +98,34 @@ const ListProducts: React.FC = () => {
     );
   }
 
+  if (isEditing) {
+    return (
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {intl.formatMessage({ 
+              id: selectedProduct ? 'admin.products.edit' : 'admin.products.create' 
+            })}
+          </h1>
+          <button
+            onClick={() => {
+              setIsEditing(false);
+              setSelectedProduct(undefined);
+            }}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            ← Back to list
+          </button>
+        </div>
+        <ProductEditor
+          initialData={selectedProduct}
+          onSubmit={selectedProduct ? handleUpdateProduct : handleCreateProduct}
+          isEditing={!!selectedProduct}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -109,7 +133,7 @@ const ListProducts: React.FC = () => {
           {intl.formatMessage({ id: 'admin.products.title' })}
         </h1>
         <button
-          onClick={handleOpenCreateModal}
+          onClick={handleOpenCreate}
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
@@ -146,7 +170,11 @@ const ListProducts: React.FC = () => {
               {products.map(product => (
                 <tr key={product.id}>
                   <td className="px-6 py-4 whitespace-nowrap">{product.name}</td>
-                  <td className="px-6 py-4">{product.description}</td>
+                  <td className="px-6 py-4">
+                    {product.description.length > 100 
+                      ? `${product.description.substring(0, 100)}...` 
+                      : product.description}
+                  </td>
                   <td className="px-6 py-4">
                     <a 
                       href={product.frontend_url} 
@@ -187,16 +215,6 @@ const ListProducts: React.FC = () => {
           </table>
         </div>
       )}
-
-      <ProductModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSubmit={selectedProduct ? handleUpdateProduct : handleCreateProduct}
-        product={selectedProduct}
-        title={intl.formatMessage({
-          id: selectedProduct ? 'admin.products.edit' : 'admin.products.create'
-        })}
-      />
     </div>
   );
 };
